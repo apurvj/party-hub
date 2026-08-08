@@ -1,6 +1,8 @@
 # Dockerfile for the Party Hub WebSocket server (used by Fly.io).
 # Multi-stage: install with pnpm, build shared types, run the server with tsx.
-FROM node:20-slim AS base
+# pnpm 11.20 (pinned via package.json#packageManager) needs Node >= 22.13
+# (it uses the node:sqlite builtin, absent in Node 20).
+FROM node:22-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 # pnpm 11 hard-errors when a dep build script is ignored, and every `pnpm run`

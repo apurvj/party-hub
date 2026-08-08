@@ -18,7 +18,7 @@ Person** can plug in next.
 
 ## Quick start
 
-Requires **Node ≥ 20** and **pnpm** (via Corepack: `corepack enable pnpm`).
+Requires **Node ≥ 22.13** and **pnpm** (via Corepack: `corepack enable pnpm`).
 
 ```bash
 pnpm install

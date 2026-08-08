@@ -10,8 +10,10 @@ services:
     startCommand: pnpm --filter @party-hub/server run start
     healthCheckPath: /health
     envVars:
+      # pnpm 11.20 (pinned via package.json#packageManager) needs Node >= 22.13
+      # — it uses the node:sqlite builtin, absent in Node 20.
       - key: NODE_VERSION
-        value: "20"
+        value: "22.13.0"
       # pnpm 11 hard-errors when a dep build script is ignored, and every
       # `pnpm run` re-verifies deps first (re-triggering it). esbuild (via tsx)
       # hits this. These env vars clear both gates for install AND run/start.
