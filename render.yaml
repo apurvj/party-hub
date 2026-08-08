@@ -1,0 +1,18 @@
+# Render Blueprint for the Party Hub WebSocket server.
+# Deploy: push to GitHub, then in Render "New +" → "Blueprint" and point it here.
+services:
+  - type: web
+    name: party-hub-server
+    runtime: node
+    plan: free
+    # Build the shared types, then the server has everything it needs (tsx runs TS directly).
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @party-hub/shared run build
+    startCommand: pnpm --filter @party-hub/server run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Set this in the Render dashboard to your Vercel frontend URL after the
+      # first deploy, e.g. https://party-hub.vercel.app
+      - key: CLIENT_ORIGIN
+        sync: false

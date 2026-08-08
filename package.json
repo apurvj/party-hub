@@ -1,0 +1,24 @@
+{
+  "name": "party-hub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Party Hub — play simple, silly, fun 2-player games with a friend far away.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./packages/*\" run dev",
+    "dev:server": "pnpm --filter @party-hub/server run dev",
+    "dev:frontend": "pnpm --filter @party-hub/frontend run dev",
+    "build": "pnpm --filter @party-hub/shared run build && pnpm --filter @party-hub/server run build && pnpm --filter @party-hub/frontend run build",
+    "test": "pnpm --filter @party-hub/server run test",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "wordlist:verify": "node packages/server/scripts/verify-wordlists.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "packageManager": "pnpm@11.20.0"
+}

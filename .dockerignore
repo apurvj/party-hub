@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+**/dist
+**/build
+.git
+.vscode
+*.log
+.env
+.env.local
+.DS_Store
+packages/frontend/dist
+party_hub_architecture.docx

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+.env
+.env.local
+.vercel
+coverage/
+*.tsbuildinfo
+
+# Local scratch / legacy files (kept on disk, not tracked)
+party_hub_architecture.docx
+test-transition.html
+test_ping.ts

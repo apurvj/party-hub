@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- design tokens: light + dark ---------------------------------------- */
+:root,
+[data-theme="light"] {
+  --bg: 246 247 251;
+  --surface: 255 255 255;
+  --surface-2: 240 242 248;
+  --border: 224 227 235;
+
+  --ink: 20 22 34;
+  --ink-soft: 74 80 98;
+  --ink-mute: 128 135 155;
+
+  --brand: 99 102 241; /* indigo */
+  --brand-soft: 224 226 255;
+  --accent: 236 72 153; /* pink */
+
+  --success: 34 168 105;
+  --warning: 217 149 20;
+  --danger: 224 62 62;
+  --info: 44 130 224;
+
+  --tile-correct: 34 168 105;
+  --tile-present: 214 158 21;
+  --tile-absent: 148 155 173;
+
+  --shadow: 30 34 60;
+}
+
+[data-theme="dark"] {
+  --bg: 11 12 18;
+  --surface: 22 24 34;
+  --surface-2: 30 33 46;
+  --border: 44 48 66;
+
+  --ink: 237 239 247;
+  --ink-soft: 179 185 205;
+  --ink-mute: 128 135 158;
+
+  --brand: 129 132 248;
+  --brand-soft: 46 48 84;
+  --accent: 244 114 182;
+
+  --success: 45 197 126;
+  --warning: 240 178 60;
+  --danger: 248 113 113;
+  --info: 96 165 250;
+
+  --tile-correct: 45 180 112;
+  --tile-present: 214 168 45;
+  --tile-absent: 76 82 104;
+
+  --shadow: 0 0 0;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--ink));
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ambient gradient wash behind everything, subtle and premium. */
+.app-aurora::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(60rem 40rem at 15% -10%, rgb(var(--brand) / 0.14), transparent 60%),
+    radial-gradient(50rem 34rem at 100% 0%, rgb(var(--accent) / 0.10), transparent 55%);
+}
+
+/* Global focus ring. We intentionally do NOT set a border-radius here so the
+   ring hugs each element's own corner radius (buttons, pills, cards differ);
+   box-shadow follows the element's border-radius automatically. */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(var(--brand) / 0.45);
+}
+
+/* Respect users who prefer less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--surface-2));
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--ink) / 0.06), transparent);
+  animation: shimmer 1.4s infinite;
+}
