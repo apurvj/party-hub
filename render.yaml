@@ -5,8 +5,13 @@ services:
     name: party-hub-server
     runtime: node
     plan: free
-    # Build the shared types, then the server has everything it needs (tsx runs TS directly).
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @party-hub/shared run build
+    # Install pnpm directly via npm rather than corepack: the corepack bundled
+    # with some Node 22.x point releases (incl. 22.13.0) ships stale npm-registry
+    # signing keys and dies with "Cannot find matching keyid" when verifying the
+    # pnpm download. npm has no such signature check. Pin the exact version to
+    # match package.json#packageManager. Then build the shared types (tsx runs the
+    # server's TS directly, so no server build step is needed).
+    buildCommand: npm install -g pnpm@11.20.0 && pnpm install --frozen-lockfile && pnpm --filter @party-hub/shared run build
     startCommand: pnpm --filter @party-hub/server run start
     healthCheckPath: /health
     envVars:

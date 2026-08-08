@@ -11,7 +11,10 @@ ENV PATH="$PNPM_HOME:$PATH"
 # its binary via lockfile-pinned platform packages, so the skipped script is a no-op.
 ENV PNPM_CONFIG_STRICT_DEP_BUILDS=false
 ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
-RUN corepack enable
+# Install pnpm directly via npm instead of corepack: corepack in some Node 22.x
+# releases ships stale npm-registry signing keys and fails to verify the pnpm
+# download ("Cannot find matching keyid"). Pin to match package.json#packageManager.
+RUN npm install -g pnpm@11.20.0
 WORKDIR /app
 
 # --- deps: install with the lockfile for reproducible builds ---
