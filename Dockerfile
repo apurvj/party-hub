@@ -14,7 +14,7 @@ COPY packages/server/package.json packages/server/
 COPY packages/frontend/package.json packages/frontend/
 # Frontend isn't needed at runtime, but its manifest is present for the workspace
 # graph; --ignore-scripts keeps the image lean (no native rebuilds needed for tsx).
-RUN pnpm install --frozen-lockfile --filter @party-hub/server... --filter @party-hub/shared...
+RUN pnpm install --frozen-lockfile --config.strict-dep-builds=false --filter @party-hub/server... --filter @party-hub/shared...
 
 # --- build shared types + copy source ---
 FROM deps AS build

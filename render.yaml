@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     # Build the shared types, then the server has everything it needs (tsx runs TS directly).
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @party-hub/shared run build
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --config.strict-dep-builds=false && pnpm --filter @party-hub/shared run build
     startCommand: pnpm --filter @party-hub/server run start
     healthCheckPath: /health
     envVars:
