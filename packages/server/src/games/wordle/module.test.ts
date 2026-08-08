@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import type { GameContext, Seat } from "@party-hub/shared";
 import { createWordleModule, type WordleState } from "./module.js";
 
-function ctxWith(seats: { A: string | null; B: string | null }): GameContext {
+function ctxWith(
+  seats: { A: string | null; B: string | null },
+  matchEpoch = 0,
+): GameContext {
   return {
     code: "TESTRM",
     seatOf: (pid) => (seats.A === pid ? "A" : seats.B === pid ? "B" : null),
     playerIdOf: (seat: Seat) => seats[seat],
+    matchEpoch,
   };
 }
 
@@ -199,6 +203,41 @@ describe("wordle module — loser sees the answer", () => {
     // "nobody got it").
     expect(mod.sanitizeFor(r.state, PA, ctx).roundWinnerSeat).toBe("A");
     expect(mod.sanitizeFor(r.state, PB, ctx).roundWinnerSeat).toBe("A");
+  });
+});
+
+describe("wordle module — rematch does not replay the same words", () => {
+  it("a new match epoch in the same room yields a different word sequence", () => {
+    const mod = createWordleModule({ mode: "race", difficulty: "normal", bestOf: 5 });
+
+    // Walk several rounds of match 0 (epoch 0), collecting the answers.
+    const seqFor = (epoch: number): string[] => {
+      const ctx = ctxWith({ A: PA, B: PB }, epoch);
+      let s = mod.createInitialState(ctx);
+      const answers = [answerOf(s)];
+      // Advance rounds by solving and readying both players.
+      for (let round = 1; round < 5; round++) {
+        s = mod.reduce(s, { type: "submit_guess", payload: { guess: answerOf(s) } }, PA, ctx).state;
+        s = mod.reduce(s, { type: "next_round" }, PA, ctx).state;
+        s = mod.reduce(s, { type: "next_round" }, PB, ctx).state;
+        answers.push(answerOf(s));
+      }
+      return answers;
+    };
+
+    const match0 = seqFor(0);
+    const match1 = seqFor(1);
+
+    // Same room + same rounds, but a different match epoch → the sequences must
+    // not be identical (this is the "Play again repeats words" bug guard).
+    expect(match1).not.toEqual(match0);
+  });
+
+  it("a given match epoch is fully deterministic (reconnect-safe)", () => {
+    const mod = createWordleModule({ mode: "race", difficulty: "normal", bestOf: 3 });
+    const a = mod.createInitialState(ctxWith({ A: PA, B: PB }, 2));
+    const b = mod.createInitialState(ctxWith({ A: PA, B: PB }, 2));
+    expect(answerOf(a)).toBe(answerOf(b));
   });
 });
 

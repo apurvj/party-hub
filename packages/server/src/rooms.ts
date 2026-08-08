@@ -35,6 +35,12 @@ interface Room {
   seats: Record<Seat, string | null>;
   module: AnyGameModule;
   gameState: unknown;
+  /**
+   * How many times the game has been (re)started in this room. 0 for the first
+   * match; bumped on every rematch. Folded into deterministic content selection
+   * (e.g. the Wordle word seed) so "Play again" doesn't replay the same words.
+   */
+  matchEpoch: number;
   createdAt: number;
   lastActivity: number;
 }
@@ -85,6 +91,7 @@ export class RoomManager {
       code: room.code,
       seatOf: (pid) => room.players.get(pid)?.seat ?? null,
       playerIdOf: (seat) => room.seats[seat],
+      matchEpoch: room.matchEpoch,
     };
   }
 
@@ -150,7 +157,7 @@ export class RoomManager {
   }
 
   private roomConfig(room: Room): RoomConfig {
-    return { wordle: room.configs.wordle };
+    return { wordle: room.configs.wordle, uno: room.configs.uno };
   }
 
   /** Push fresh state to every connected, seated player. */
@@ -201,6 +208,7 @@ export class RoomManager {
       seats: { A: null, B: null },
       module: createGameModule(gameId, configs),
       gameState: null,
+      matchEpoch: 0,
       createdAt: Date.now(),
       lastActivity: Date.now(),
     };
@@ -302,6 +310,13 @@ export class RoomManager {
     const room = this.rooms.get(code);
     if (!room) return { ok: false, error: makeError(ErrorCode.ROOM_NOT_FOUND) };
     if (!room.players.get(playerId)?.seat) return { ok: false, error: makeError(ErrorCode.NOT_IN_ROOM) };
+    // "Play again" is only offered once the match is decided. Enforce that on the
+    // server too, so a crafted client can't reset a live match to escape a losing
+    // position (the UI only shows the button at game_over anyway).
+    if (room.phase !== "game_over") return { ok: false, error: makeError(ErrorCode.GAME_NOT_ACTIVE) };
+    // Advance the match epoch BEFORE rebuilding state so the new match seeds off
+    // a fresh value — otherwise "Play again" replays the identical word sequence.
+    room.matchEpoch += 1;
     room.gameState = room.module.createInitialState(this.ctxFor(room));
     room.phase = room.module.phaseOf(room.gameState);
     this.touch(room);

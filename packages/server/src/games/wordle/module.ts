@@ -81,7 +81,9 @@ function otherSeat(s: Seat): Seat {
 
 function newRound(state: WordleState, ctx: GameContext, roundNumber: number): void {
   state.roundNumber = roundNumber;
-  state.answer = selectWord(ctx.code, roundNumber, state.config.difficulty);
+  // matchEpoch keeps successive matches in the same room from replaying the
+  // identical word sequence after "Play again" (which restarts at round 1).
+  state.answer = selectWord(ctx.code, roundNumber, state.config.difficulty, ctx.matchEpoch);
   state.roundOver = false;
   state.finishCounter = 0;
   state.rounds = emptyRounds();

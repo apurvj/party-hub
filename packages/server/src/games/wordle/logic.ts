@@ -63,9 +63,15 @@ export function isWinningFeedback(fb: GuessFeedback): boolean {
  * Deterministically select the answer for a given room + round.
  *
  * The whole answer pool is shuffled once per room (seeded by roomCode +
- * difficulty + list version), giving a stable no-repeat ordering. Round N picks
- * position (N-1); once the pool is exhausted we wrap with a fresh reshuffle
- * seeded by the cycle number so later rounds stay deterministic too.
+ * difficulty + list version + match epoch), giving a stable no-repeat ordering.
+ * Round N picks position (N-1); once the pool is exhausted we wrap with a fresh
+ * reshuffle seeded by the cycle number so later rounds stay deterministic too.
+ *
+ * `matchEpoch` distinguishes successive matches in the SAME room: without it, a
+ * "Play again" restarts at round 1 and re-derives the identical shuffle, so
+ * every rematch replays the same words. Folding the epoch in gives each match a
+ * fresh sequence while keeping a single match perfectly reproducible (the epoch
+ * is fixed for a match's lifetime → reconnect/refresh yields the same word).
  *
  * DETERMINISM: identical inputs → identical word, on any platform, across
  * restarts. The client never calls this; only the server does.
@@ -74,6 +80,7 @@ export function selectWord(
   roomCode: string,
   roundNumber: number, // 1-based
   difficulty: WordleDifficulty,
+  matchEpoch = 0,
 ): string {
   const pool = getAnswerPool(difficulty);
   if (pool.length === 0) throw new Error("selectWord: empty answer pool");
@@ -82,12 +89,27 @@ export function selectWord(
   const cycle = Math.floor(idx0 / pool.length);
   const posInCycle = idx0 % pool.length;
 
-  const seed = `${roomCode}#${difficulty}#v${WORDLIST_VERSION}#cycle${cycle}`;
+  const seed = wordSeed(roomCode, difficulty, cycle, matchEpoch);
   const shuffled = seededShuffle(pool, seed);
   return shuffled[posInCycle]!;
 }
 
+/** The seed string a room's per-cycle shuffle is derived from (single source). */
+function wordSeed(
+  roomCode: string,
+  difficulty: string,
+  cycle: number,
+  matchEpoch: number,
+): string {
+  return `${roomCode}#${difficulty}#v${WORDLIST_VERSION}#match${matchEpoch}#cycle${cycle}`;
+}
+
 /** Exposed for tests / debugging: the raw seeded index (not word). */
-export function _wordSeedHash(roomCode: string, difficulty: string, cycle: number): number {
-  return cyrb53(`${roomCode}#${difficulty}#v${WORDLIST_VERSION}#cycle${cycle}`);
+export function _wordSeedHash(
+  roomCode: string,
+  difficulty: string,
+  cycle: number,
+  matchEpoch = 0,
+): number {
+  return cyrb53(wordSeed(roomCode, difficulty, cycle, matchEpoch));
 }

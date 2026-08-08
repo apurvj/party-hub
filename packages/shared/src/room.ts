@@ -1,8 +1,9 @@
 import type { WordleConfig, WordlePublicView } from "./games/wordle.js";
+import type { UnoConfig, UnoPublicView } from "./games/uno.js";
 
 export type Seat = "A" | "B";
 
-export type GameId = "wordle"; // "uno" | "guess-the-person" added later
+export type GameId = "wordle" | "uno"; // "guess-the-person" added later
 
 /** Room-level lifecycle. Both players transition together. */
 export type RoomPhase =
@@ -21,13 +22,14 @@ export interface PlayerView {
   isYou: boolean;
 }
 
-/** Config bundle chosen at room creation. Only wordle for now. */
+/** Config bundle chosen at room creation. */
 export interface RoomConfig {
   wordle: WordleConfig;
+  uno: UnoConfig;
 }
 
 /** Discriminated union of the per-game public view carried in RoomStatePayload. */
-export type GamePublicView = WordlePublicView; // | UnoPublicView | ...
+export type GamePublicView = WordlePublicView | UnoPublicView;
 
 /**
  * The single snapshot the server sends on join AND on reconnect. Everything the

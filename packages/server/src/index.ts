@@ -4,6 +4,7 @@ import express from "express";
 import { Server } from "socket.io";
 import { z } from "zod";
 import {
+  DEFAULT_UNO_CONFIG,
   DEFAULT_WORDLE_CONFIG,
   ErrorCode,
   fail,
@@ -42,9 +43,16 @@ const wordleConfigSchema = z
   })
   .optional();
 
+const unoConfigSchema = z
+  .object({
+    bestOf: z.number().int().min(1).max(9).optional(),
+  })
+  .optional();
+
 const createRoomSchema = z.object({
-  gameId: z.enum(["wordle"]),
+  gameId: z.enum(["wordle", "uno"]),
   wordle: wordleConfigSchema,
+  uno: unoConfigSchema,
 });
 
 const joinRoomSchema = z.object({ code: z.string().min(1).max(12) });
@@ -166,6 +174,7 @@ io.on("connection", (socket) => {
 
     const room = rooms.createRoom(parsed.data.gameId, {
       wordle: { ...DEFAULT_WORDLE_CONFIG, ...parsed.data.wordle },
+      uno: { ...DEFAULT_UNO_CONFIG, ...parsed.data.uno },
     });
     const res = rooms.join(room.code, playerId, nickname);
     if (!res.ok) return ack(fail(res.error));

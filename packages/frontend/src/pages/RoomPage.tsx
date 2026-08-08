@@ -7,6 +7,7 @@ import { ConnBar } from "../components/ConnBar.js";
 import { Lobby } from "../components/Lobby.js";
 import { Button, Card, Input } from "../design-system/index.js";
 import { WordleGame } from "../games/wordle/WordleGame.js";
+import { UnoGame } from "../games/uno/UnoGame.js";
 import { getNickname, setNickname } from "../net/identity.js";
 import { useRoom } from "../net/useRoom.js";
 
@@ -24,9 +25,21 @@ export function RoomPage() {
   const [nickname, setNick] = useState(() => getNickname());
   const hasNickname = nickname.trim().length > 0;
 
-  const { status, room, lastEvent, joinRoom, submitGuess, nextRound, requestHint, rematch } = useRoom(
-    valid && hasNickname ? code : undefined,
-  );
+  const {
+    status,
+    room,
+    lastEvent,
+    joinRoom,
+    submitGuess,
+    nextRound,
+    requestHint,
+    rematch,
+    unoPlay,
+    unoDraw,
+    unoPass,
+    unoCallUno,
+    unoCatch,
+  } = useRoom(valid && hasNickname ? code : undefined);
 
   // Joining is driven by the socket handshake: `useRoom(code)` connects with the
   // room code in auth, and the server auto-joins/reconnects us and pushes
@@ -109,6 +122,19 @@ export function RoomPage() {
             onGuess={submitGuess}
             onNextRound={nextRound}
             onHint={requestHint}
+            onRematch={rematch}
+          />
+        ) : room.game && room.game.gameId === "uno" ? (
+          <UnoGame
+            room={room}
+            game={room.game}
+            lastEvent={lastEvent}
+            onPlay={unoPlay}
+            onDraw={unoDraw}
+            onPass={unoPass}
+            onCallUno={unoCallUno}
+            onCatch={unoCatch}
+            onNextRound={nextRound}
             onRematch={rematch}
           />
         ) : (

@@ -6,12 +6,21 @@ export function Lobby({ room, shareUrl }: { room: RoomStatePayload; shareUrl: st
   const you = room.you;
   const opponent = room.players.find((p) => !p.isYou) ?? null;
 
+  const isUno = room.gameId === "uno";
+  const label = isUno
+    ? "Uno"
+    : room.config.wordle.mode === "coop"
+      ? "Co-op Wordle"
+      : "Race Wordle";
+  const bestOf = isUno ? room.config.uno.bestOf : room.config.wordle.bestOf;
+  const tagline = isUno
+    ? `Best of ${bestOf} • Stacking on • Refresh-safe`
+    : `Best of ${bestOf} • Same word for both players • Refresh-safe`;
+
   return (
     <div className="mx-auto max-w-lg pt-6">
       <Card className="text-center">
-        <div className="mb-1 text-sm font-semibold uppercase tracking-wide text-brand">
-          {room.config.wordle.mode === "coop" ? "Co-op Wordle" : "Race Wordle"}
-        </div>
+        <div className="mb-1 text-sm font-semibold uppercase tracking-wide text-brand">{label}</div>
         <h2 className="font-display text-2xl font-bold text-ink">Your room is ready</h2>
         <p className="mt-1 text-ink-soft">Share this link so your friend can hop in.</p>
 
@@ -41,9 +50,7 @@ export function Lobby({ room, shareUrl }: { room: RoomStatePayload; shareUrl: st
           </div>
         </div>
 
-        <p className="mt-5 text-xs text-ink-mute">
-          Best of {room.config.wordle.bestOf} • Same word for both players • Refresh-safe
-        </p>
+        <p className="mt-5 text-xs text-ink-mute">{tagline}</p>
       </Card>
     </div>
   );

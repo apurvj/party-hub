@@ -1,6 +1,7 @@
 import type { AppError } from "./errors.js";
 import type { GameId, RoomStatePayload } from "./room.js";
 import type { WordleConfig } from "./games/wordle.js";
+import type { UnoConfig } from "./games/uno.js";
 
 /**
  * The socket event catalog — the single source of truth for the wire protocol.
@@ -24,6 +25,7 @@ export interface HandshakeAuth {
 export interface CreateRoomReq {
   gameId: GameId;
   wordle?: Partial<WordleConfig>;
+  uno?: Partial<UnoConfig>;
 }
 export interface CreateRoomRes {
   code: string;
@@ -79,7 +81,9 @@ export interface RoomNotice {
 // `game:action` ack error envelope. `GameEvent` is reserved for moments BOTH
 // players should observe (a round/match ending, a new round starting).
 export type GameEvent =
-  | { kind: "round_over"; winnerSeat: "A" | "B" | "tie" | null; answer: string }
+  // `answer` is Wordle-specific (the revealed word); omitted for games without
+  // one (e.g. Uno). `winnerSeat` is null when nobody solved/won the round.
+  | { kind: "round_over"; winnerSeat: "A" | "B" | "tie" | null; answer?: string }
   | { kind: "match_over"; winnerSeat: "A" | "B" | "tie" }
   | { kind: "round_started"; roundNumber: number };
 

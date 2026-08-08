@@ -1,13 +1,18 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { WordleMode } from "@party-hub/shared";
+import type { GameId, WordleMode } from "@party-hub/shared";
 import { isValidRoomCode, normalizeRoomCode } from "@party-hub/shared";
 import { AppShell } from "../components/AppShell.js";
 import { Button, Card, Input, cx, useToast } from "../design-system/index.js";
 import { getNickname, setNickname } from "../net/identity.js";
 import { getSocket, emitAck } from "../net/socket.js";
 import type { CreateRoomReq, CreateRoomRes, Result } from "@party-hub/shared";
+
+const GAMES: { value: GameId; label: string; blurb: string; icon: string }[] = [
+  { value: "wordle", label: "Wordle", blurb: "Guess the 5-letter word", icon: "🟩" },
+  { value: "uno", label: "Uno", blurb: "Empty your hand first", icon: "🎴" },
+];
 
 const MODES: { value: WordleMode; label: string; blurb: string; icon: string }[] = [
   { value: "race", label: "Race", blurb: "Same word, first to solve wins", icon: "⚡️" },
@@ -21,6 +26,7 @@ export function HomePage() {
   const { show } = useToast();
   const [nickname, setNick] = useState(getNickname());
   const [joinCode, setJoinCode] = useState("");
+  const [gameId, setGameId] = useState<GameId>("wordle");
   const [mode, setMode] = useState<WordleMode>("race");
   const [bestOf, setBestOf] = useState(3);
   const [busy, setBusy] = useState<"create" | "join" | null>(null);
@@ -33,7 +39,10 @@ export function HomePage() {
     setBusy("create");
     const sock = getSocket();
     if (!sock.connected) sock.connect();
-    const req: CreateRoomReq = { gameId: "wordle", wordle: { mode, bestOf, difficulty: "normal" } };
+    const req: CreateRoomReq =
+      gameId === "uno"
+        ? { gameId: "uno", uno: { bestOf } }
+        : { gameId: "wordle", wordle: { mode, bestOf, difficulty: "normal" } };
     const res = await emitAck<CreateRoomReq, Result<CreateRoomRes>>(sock, "room:create", req);
     setBusy(null);
     if (res.ok) navigate(`/room/${res.data.code}`);
@@ -67,7 +76,7 @@ export function HomePage() {
             </span>
           </h1>
           <p className="mt-3 text-lg text-ink-soft">
-            Spin up a private room and share the link with a friend. First game up: Wordle.
+            Spin up a private room and share the link with a friend. Wordle and Uno, ready to play.
           </p>
         </motion.div>
 
@@ -81,26 +90,50 @@ export function HomePage() {
           />
 
           <div>
-            <span className="mb-2 block text-sm font-medium text-ink-soft">Mode</span>
+            <span className="mb-2 block text-sm font-medium text-ink-soft">Game</span>
             <div className="grid grid-cols-2 gap-3">
-              {MODES.map((m) => (
+              {GAMES.map((g) => (
                 <button
-                  key={m.value}
-                  onClick={() => setMode(m.value)}
+                  key={g.value}
+                  onClick={() => setGameId(g.value)}
                   className={cx(
                     "rounded-xl border p-4 text-left transition-all",
-                    mode === m.value
+                    gameId === g.value
                       ? "border-brand bg-brand-soft/60 shadow-e2"
                       : "border-border bg-surface-2 hover:border-brand/50",
                   )}
                 >
-                  <div className="text-2xl">{m.icon}</div>
-                  <div className="mt-1 font-semibold text-ink">{m.label}</div>
-                  <div className="text-xs text-ink-mute">{m.blurb}</div>
+                  <div className="text-2xl">{g.icon}</div>
+                  <div className="mt-1 font-semibold text-ink">{g.label}</div>
+                  <div className="text-xs text-ink-mute">{g.blurb}</div>
                 </button>
               ))}
             </div>
           </div>
+
+          {gameId === "wordle" && (
+            <div>
+              <span className="mb-2 block text-sm font-medium text-ink-soft">Mode</span>
+              <div className="grid grid-cols-2 gap-3">
+                {MODES.map((m) => (
+                  <button
+                    key={m.value}
+                    onClick={() => setMode(m.value)}
+                    className={cx(
+                      "rounded-xl border p-4 text-left transition-all",
+                      mode === m.value
+                        ? "border-brand bg-brand-soft/60 shadow-e2"
+                        : "border-border bg-surface-2 hover:border-brand/50",
+                    )}
+                  >
+                    <div className="text-2xl">{m.icon}</div>
+                    <div className="mt-1 font-semibold text-ink">{m.label}</div>
+                    <div className="text-xs text-ink-mute">{m.blurb}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <span className="mb-2 block text-sm font-medium text-ink-soft">Match length</span>

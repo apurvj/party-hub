@@ -6,6 +6,7 @@ import type {
   Result,
   RoomNotice,
   RoomStatePayload,
+  UnoColor,
   WordleConfig,
 } from "@party-hub/shared";
 import { useToast } from "../design-system/index.js";
@@ -46,6 +47,12 @@ interface UseRoomResult {
   nextRound: () => Promise<Result<null>>;
   requestHint: () => Promise<Result<null>>;
   rematch: () => Promise<Result<null>>;
+  /** Uno action senders (no-ops for other games). */
+  unoPlay: (cardId: string, chosenColor?: UnoColor) => Promise<Result<null>>;
+  unoDraw: () => Promise<Result<null>>;
+  unoPass: () => Promise<Result<null>>;
+  unoCallUno: () => Promise<Result<null>>;
+  unoCatch: () => Promise<Result<null>>;
 }
 
 /**
@@ -173,7 +180,51 @@ export function useRoom(roomCode?: string): UseRoomResult {
     return emitAck<undefined, Result<null>>(sock, "room:rematch");
   }, []);
 
-  return { status, room, lastEvent, createRoom, joinRoom, submitGuess, nextRound, requestHint, rematch };
+  const unoPlay = useCallback(async (cardId: string, chosenColor?: UnoColor) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { cardId: string; chosenColor?: UnoColor } }, Result<null>>(
+      sock,
+      "game:action",
+      { type: "play_card", payload: { cardId, chosenColor } },
+    );
+  }, []);
+
+  const unoDraw = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "draw_card" });
+  }, []);
+
+  const unoPass = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "pass" });
+  }, []);
+
+  const unoCallUno = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "call_uno" });
+  }, []);
+
+  const unoCatch = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "catch_uno" });
+  }, []);
+
+  return {
+    status,
+    room,
+    lastEvent,
+    createRoom,
+    joinRoom,
+    submitGuess,
+    nextRound,
+    requestHint,
+    rematch,
+    unoPlay,
+    unoDraw,
+    unoPass,
+    unoCallUno,
+    unoCatch,
+  };
 }
 
 export { getNickname, persistNickname };

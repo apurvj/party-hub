@@ -17,6 +17,15 @@ export interface GameContext {
   code: string;
   seatOf: (playerId: string) => Seat | null;
   playerIdOf: (seat: Seat) => string | null;
+  /**
+   * How many times this room has (re)started the game — 0 for the first match,
+   * incremented on every "Play again"/rematch. Games fold this into any
+   * deterministic content selection (e.g. Wordle's word seed) so a rematch in
+   * the SAME room doesn't replay the identical sequence of words/deals. It stays
+   * constant for a match's lifetime, so reconnect/refresh still resolves the
+   * same word.
+   */
+  matchEpoch: number;
 }
 
 /**
