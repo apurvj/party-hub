@@ -6,12 +6,20 @@ services:
     runtime: node
     plan: free
     # Build the shared types, then the server has everything it needs (tsx runs TS directly).
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --config.strict-dep-builds=false && pnpm --filter @party-hub/shared run build
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @party-hub/shared run build
     startCommand: pnpm --filter @party-hub/server run start
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
         value: "20"
+      # pnpm 11 hard-errors when a dep build script is ignored, and every
+      # `pnpm run` re-verifies deps first (re-triggering it). esbuild (via tsx)
+      # hits this. These env vars clear both gates for install AND run/start.
+      # Safe: esbuild ships its binary via lockfile-pinned platform packages.
+      - key: PNPM_CONFIG_STRICT_DEP_BUILDS
+        value: "false"
+      - key: PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN
+        value: "false"
       # Set this in the Render dashboard to your Vercel frontend URL after the
       # first deploy, e.g. https://party-hub.vercel.app
       - key: CLIENT_ORIGIN

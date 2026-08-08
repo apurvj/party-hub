@@ -3,6 +3,12 @@
 FROM node:20-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+# pnpm 11 hard-errors when a dep build script is ignored, and every `pnpm run`
+# re-verifies deps first (re-triggering it). esbuild (via tsx) hits this. These
+# clear both gates for install AND the `pnpm run start` CMD. Safe: esbuild ships
+# its binary via lockfile-pinned platform packages, so the skipped script is a no-op.
+ENV PNPM_CONFIG_STRICT_DEP_BUILDS=false
+ENV PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false
 RUN corepack enable
 WORKDIR /app
 
@@ -14,7 +20,7 @@ COPY packages/server/package.json packages/server/
 COPY packages/frontend/package.json packages/frontend/
 # Frontend isn't needed at runtime, but its manifest is present for the workspace
 # graph; --ignore-scripts keeps the image lean (no native rebuilds needed for tsx).
-RUN pnpm install --frozen-lockfile --config.strict-dep-builds=false --filter @party-hub/server... --filter @party-hub/shared...
+RUN pnpm install --frozen-lockfile --filter @party-hub/server... --filter @party-hub/shared...
 
 # --- build shared types + copy source ---
 FROM deps AS build
