@@ -106,7 +106,7 @@ export interface UnoPublicView {
   /** How many cards remain to be drawn (draw pile). */
   drawPileCount: number;
 
-  /** YOUR hand — full detail (this is your own info). */
+  /** YOUR hand - full detail (this is your own info). */
   hand: UnoCard[];
   /** Of your hand, the subset you may legally play right now (card ids). */
   playableCardIds: string[];

@@ -49,7 +49,7 @@ export interface SelfRoundView {
   status: PlayerRoundStatus;
   solvedInGuesses: number | null; // set when won
   /**
-   * A single opt-in hint — ONE correct letter and its position — populated only
+   * A single opt-in hint - ONE correct letter and its position - populated only
    * after this player requests it. `null` until then. This is the ONLY place a
    * fragment of the answer appears mid-round, it's bounded to one letter, and
    * it's gated to a player's last two guesses (see `canHint`). The full word is
@@ -61,7 +61,7 @@ export interface SelfRoundView {
 }
 
 /**
- * What the client knows about its OPPONENT this round. Crucially NOT the words —
+ * What the client knows about its OPPONENT this round. Crucially NOT the words -
  * only the color pattern per row, so you can feel the race without cheating off
  * their letters.
  */
@@ -98,13 +98,13 @@ export interface WordlePublicView {
    * this to its own seat to enforce strict turn-taking in the UI.
    */
   coopTurn: "A" | "B" | null;
-  /** When the round ended, the answer IS revealed (round is over — safe). */
+  /** When the round ended, the answer IS revealed (round is over - safe). */
   revealedAnswer: string | null;
   /**
    * Between-rounds readiness. Once the round is over, BOTH players must signal
    * ready before the next round begins (so no one is dropped mid-thought into a
    * fresh board). `youReady` reflects this player; `opponentReady` the other.
-   * Both `false` in co-op-vs-nobody / pre-round states — only meaningful when
+   * Both `false` in co-op-vs-nobody / pre-round states - only meaningful when
    * `roundStatus === "over"` and the match isn't decided.
    */
   youReady: boolean;

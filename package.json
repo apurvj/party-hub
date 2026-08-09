@@ -2,7 +2,7 @@
   "name": "party-hub",
   "version": "0.1.0",
   "private": true,
-  "description": "Party Hub — play simple, silly, fun 2-player games with a friend far away.",
+  "description": "Party Hub - play simple, silly, fun 2-player games with a friend far away.",
   "type": "module",
   "engines": {
     "node": ">=22.13"

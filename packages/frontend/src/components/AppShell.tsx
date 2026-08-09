@@ -6,7 +6,7 @@ export function AppShell({ children, right }: { children: ReactNode; right?: Rea
   return (
     <div className="app-aurora relative min-h-full">
       <header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-5">
-        <Link to="/" className="group rounded-lg" aria-label="Party Hub — home">
+        <Link to="/" className="group rounded-lg" aria-label="Party Hub - home">
           <Logo />
         </Link>
         <div className="flex items-center gap-3">

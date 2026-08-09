@@ -22,7 +22,7 @@ import { isValidGuess } from "./wordlist.js";
 
 /**
  * A hint may be requested once a player is down to their last two guesses. It
- * reveals exactly ONE correct letter + position — a bounded nudge that never
+ * reveals exactly ONE correct letter + position - a bounded nudge that never
  * discloses the whole word before the round is over.
  */
 const HINT_UNLOCK_AT_GUESSES = MAX_GUESSES - 2; // 4 used → 2 remaining
@@ -42,7 +42,7 @@ interface PlayerRound {
 export interface WordleState {
   config: WordleConfig;
   roundNumber: number; // 1-based
-  answer: string; // SECRET — never leaves the server until round is over
+  answer: string; // SECRET - never leaves the server until round is over
   roundOver: boolean;
   finishCounter: number; // increments as players finish → assigns finishedOrder
   rounds: Record<Seat, PlayerRound>;
@@ -70,7 +70,7 @@ function emptyRound(): PlayerRound {
   };
 }
 
-/** Fresh per-seat round records — the single source of the round shape. */
+/** Fresh per-seat round records - the single source of the round shape. */
 function emptyRounds(): Record<Seat, PlayerRound> {
   return { A: emptyRound(), B: emptyRound() };
 }
@@ -133,7 +133,7 @@ function resolveRound(state: WordleState): GameEvent[] {
   }
 
   // Persist the round outcome so the sanitized view (and thus the overlay) can
-  // show who won THIS round — not just who won the match. The transient event
+  // show who won THIS round - not just who won the match. The transient event
   // below is fire-and-forget; a reconnect during round-over would otherwise
   // lose this.
   state.roundWinnerSeat = winnerSeat;
@@ -193,7 +193,7 @@ function applyGuess(
 
   const events: GameEvent[] = [];
   // Race: the first player to SOLVE wins immediately (per the "first to solve
-  // wins" design) — no waiting on a stalled opponent. If instead the current
+  // wins" design) - no waiting on a stalled opponent. If instead the current
   // player just used their last guess, the round only ends once BOTH have
   // finished (the opponent might still solve). Co-op: the shared board finishing
   // (won or lost) ends the round.
@@ -306,7 +306,7 @@ export function createWordleModule(
         state.readyForNext[seat] = true;
         const bothReady = state.readyForNext.A && state.readyForNext.B;
         // If the opponent's seat is empty (they left mid-match), don't strand the
-        // remaining player waiting forever — a lone occupant can advance solo.
+        // remaining player waiting forever - a lone occupant can advance solo.
         const soloOccupant = ctx.playerIdOf(otherSeat(seat)) === null;
         if (!bothReady && !soloOccupant) {
           // Broadcast the readiness change (no round transition yet).
@@ -351,7 +351,7 @@ export function createWordleModule(
 
       const oppView =
         state.config.mode === "coop"
-          ? null // shared board — no separate opponent panel
+          ? null // shared board - no separate opponent panel
           : {
               rowStates: opponentRowStates(opp),
               status: opp.status,
@@ -376,7 +376,7 @@ export function createWordleModule(
         roundWinnerSeat: state.roundWinnerSeat,
         matchWinnerSeat: state.matchWinnerSeat,
         coopTurn: state.config.mode === "coop" ? state.coopTurn : null,
-        // Answer is revealed ONLY once the round is over — never mid-round.
+        // Answer is revealed ONLY once the round is over - never mid-round.
         revealedAnswer: state.roundOver ? state.answer : null,
         // Between-rounds readiness keys on each player's ACTUAL seat (never the
         // shared co-op board), so both partners are tracked independently.

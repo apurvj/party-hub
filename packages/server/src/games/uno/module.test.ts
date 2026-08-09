@@ -52,7 +52,7 @@ function rig(
   state.pendingDrawType = null;
 }
 
-describe("uno module — setup", () => {
+describe("uno module - setup", () => {
   it("deals 7 cards each and starts on a number card, A to move", () => {
     const { state } = setup();
     expect(state.hands.A.length).toBe(7);
@@ -80,7 +80,7 @@ describe("uno module — setup", () => {
   });
 });
 
-describe("uno module — turn + play rules", () => {
+describe("uno module - turn + play rules", () => {
   it("rejects a play out of turn", () => {
     const { mod, ctx, state } = setup();
     rig(state, { turn: "A", activeColor: "red", top: c({ id: "t", kind: "number", color: "red", value: 5 }),
@@ -139,7 +139,7 @@ describe("uno module — turn + play rules", () => {
   });
 });
 
-describe("uno module — draw then play / pass", () => {
+describe("uno module - draw then play / pass", () => {
   it("draws exactly one card, may then pass, turn passes to opponent", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
@@ -196,7 +196,7 @@ describe("uno module — draw then play / pass", () => {
   });
 });
 
-describe("uno module — draw stacking (+2 / +4)", () => {
+describe("uno module - draw stacking (+2 / +4)", () => {
   it("a Draw Two can be stacked, and the non-stacker draws the full pile", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
@@ -224,7 +224,7 @@ describe("uno module — draw stacking (+2 / +4)", () => {
     expect(drew.error).toBeUndefined();
     expect(drew.state.hands.A.length).toBe(1 /* ax */ + 4 /* penalty */);
     expect(drew.state.pendingDraw).toBe(0);
-    // House rule: taking the penalty is your draw for the turn — it does NOT
+    // House rule: taking the penalty is your draw for the turn - it does NOT
     // forfeit the turn. A keeps the move and may play a drawn/held card or pass.
     expect(drew.state.hasDrawn).toBe(true);
     expect(drew.state.turn).toBe("A");
@@ -270,7 +270,7 @@ describe("uno module — draw stacking (+2 / +4)", () => {
       top: c({ id: "t", kind: "draw_two", color: "red" }),
       handB: [c({ id: "bx", kind: "number", color: "green", value: 1 })],
       drawPile: [
-        c({ id: "p2", kind: "draw_two", color: "blue" }), // drawn 2nd — a different-color +2
+        c({ id: "p2", kind: "draw_two", color: "blue" }), // drawn 2nd - a different-color +2
         c({ id: "p1", kind: "number", color: "green", value: 7 }), // drawn 1st
       ],
     });
@@ -324,7 +324,7 @@ describe("uno module — draw stacking (+2 / +4)", () => {
   });
 });
 
-describe("uno module — draw pile exhaustion + reshuffle", () => {
+describe("uno module - draw pile exhaustion + reshuffle", () => {
   /** Count every physical card currently tracked in the state (must stay 108). */
   function totalCards(state: UnoState): number {
     return (
@@ -363,7 +363,7 @@ describe("uno module — draw pile exhaustion + reshuffle", () => {
     expect(drew.state.reshuffleCount).toBe(1);
   });
 
-  it("reshuffle is deterministic — identical states recycle to the identical order", () => {
+  it("reshuffle is deterministic - identical states recycle to the identical order", () => {
     function exhaustAndDraw(): UnoState {
       const { mod, ctx, state } = setup();
       rig(state, {
@@ -418,7 +418,7 @@ describe("uno module — draw pile exhaustion + reshuffle", () => {
     expect(totalCards(drew.state)).toBe(before);
   });
 
-  it("never deadlocks when BOTH piles are empty — the turn simply passes", () => {
+  it("never deadlocks when BOTH piles are empty - the turn simply passes", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
       turn: "A",
@@ -455,21 +455,21 @@ describe("uno module — draw pile exhaustion + reshuffle", () => {
   });
 });
 
-describe("uno module — UNO call + catch", () => {
-  it("catches an opponent on one card who didn't call → they draw 2", () => {
+describe("uno module - UNO call + catch", () => {
+  it("catches an opponent on one card who didn't call → they draw 5", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
       turn: "A",
       activeColor: "red",
       top: c({ id: "t", kind: "number", color: "red", value: 5 }),
       handB: [c({ id: "b1", kind: "number", color: "green", value: 9 })],
-      drawPile: [c({ id: "d1", kind: "number", color: "green", value: 0 }), c({ id: "d2", kind: "number", color: "green", value: 1 })],
+      drawPile: Array.from({ length: 5 }, (_, i) => c({ id: `d${i}`, kind: "number", color: "green", value: i })),
     });
     state.calledUno.B = false;
     // A catches B (B has one card, no call).
     const caught = mod.reduce(state, { type: "catch_uno" }, PA, ctx);
     expect(caught.error).toBeUndefined();
-    expect(caught.state.hands.B.length).toBe(3); // 1 + 2 penalty
+    expect(caught.state.hands.B.length).toBe(6); // 1 + 5 penalty
   });
 
   it("cannot catch an opponent who validly called UNO", () => {
@@ -484,21 +484,54 @@ describe("uno module — UNO call + catch", () => {
     expect(mod.reduce(state, { type: "catch_uno" }, PA, ctx).error?.code).toBe("INVALID_ACTION");
   });
 
-  it("call_uno only valid on exactly one card", () => {
+  it("call_uno is valid at two cards (pre-call) and one card, but not three+", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
       turn: "A",
       activeColor: "red",
       top: c({ id: "t", kind: "number", color: "red", value: 5 }),
-      handA: [c({ id: "a1", kind: "number", color: "red", value: 1 }), c({ id: "a2", kind: "number", color: "red", value: 2 })],
+      handA: [
+        c({ id: "a1", kind: "number", color: "red", value: 1 }),
+        c({ id: "a2", kind: "number", color: "red", value: 2 }),
+        c({ id: "a3", kind: "number", color: "red", value: 3 }),
+      ],
     });
+    // Three cards → too early to call.
     expect(mod.reduce(state, { type: "call_uno" }, PA, ctx).error?.code).toBe("INVALID_ACTION");
-    state.hands.A = [c({ id: "a1", kind: "number", color: "red", value: 1 })];
+    // Two cards → the authentic pre-call before laying your second-to-last card.
+    state.hands.A = [
+      c({ id: "a1", kind: "number", color: "red", value: 1 }),
+      c({ id: "a2", kind: "number", color: "red", value: 2 }),
+    ];
     expect(mod.reduce(state, { type: "call_uno" }, PA, ctx).error).toBeUndefined();
+    // One card → still allowed as a grace.
+    state.hands.A = [c({ id: "a1", kind: "number", color: "red", value: 1 })];
+    state.calledUno.A = false;
+    expect(mod.reduce(state, { type: "call_uno" }, PA, ctx).error).toBeUndefined();
+  });
+
+  it("a UNO call at two cards survives playing down to one - no catch", () => {
+    const { mod, ctx, state } = setup();
+    rig(state, {
+      turn: "A",
+      activeColor: "red",
+      top: c({ id: "t", kind: "number", color: "red", value: 5 }),
+      handA: [
+        c({ id: "a1", kind: "number", color: "red", value: 1 }),
+        c({ id: "a2", kind: "number", color: "blue", value: 2 }),
+      ],
+    });
+    // Call at two, then play down to one.
+    expect(mod.reduce(state, { type: "call_uno" }, PA, ctx).error).toBeUndefined();
+    const played = mod.reduce(state, { type: "play_card", payload: { cardId: "a1" } }, PA, ctx);
+    expect(played.state.hands.A.length).toBe(1);
+    expect(played.state.calledUno.A).toBe(true); // call persists through the play
+    // B therefore cannot catch A.
+    expect(mod.reduce(played.state, { type: "catch_uno" }, PB, ctx).error?.code).toBe("INVALID_ACTION");
   });
 });
 
-describe("uno module — winning and scoring", () => {
+describe("uno module - winning and scoring", () => {
   it("emptying your hand wins the round and scores", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
@@ -514,7 +547,7 @@ describe("uno module — winning and scoring", () => {
     expect(r.events?.some((e) => e.kind === "round_over")).toBe(true);
   });
 
-  it("playing a Draw Two as your LAST card wins immediately — no pending draw, no wait", () => {
+  it("playing a Draw Two as your LAST card wins immediately - no pending draw, no wait", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
       turn: "A",
@@ -527,14 +560,14 @@ describe("uno module — winning and scoring", () => {
     expect(r.state.roundWinnerSeat).toBe("A");
     expect(r.state.scores.A).toBe(1);
     // The +2 effect must NOT run: no penalty is left waiting on B, and the turn
-    // is not handed over — the round is simply over.
+    // is not handed over - the round is simply over.
     expect(r.state.pendingDraw).toBe(0);
     expect(r.state.pendingDrawType).toBe(null);
     expect(r.state.hands.A.length).toBe(0);
     expect(r.events?.some((e) => e.kind === "round_over")).toBe(true);
   });
 
-  it("playing a Wild Draw Four as your LAST card wins immediately — no pending draw", () => {
+  it("playing a Wild Draw Four as your LAST card wins immediately - no pending draw", () => {
     const { mod, ctx, state } = setup();
     rig(state, {
       turn: "A",
@@ -548,7 +581,7 @@ describe("uno module — winning and scoring", () => {
     expect(r.state.pendingDraw).toBe(0);
     expect(r.state.pendingDrawType).toBe(null);
     expect(r.state.hands.A.length).toBe(0);
-    expect(r.state.hands.B.length).toBe(7); // opponent untouched — never drew
+    expect(r.state.hands.B.length).toBe(7); // opponent untouched - never drew
   });
 
   it("best-of-1: winning a round ends the match", () => {
@@ -565,7 +598,7 @@ describe("uno module — winning and scoring", () => {
   });
 });
 
-describe("uno module — between-rounds + rematch determinism", () => {
+describe("uno module - between-rounds + rematch determinism", () => {
   it("advances only after both ready, dealing a fresh round", () => {
     const { mod, ctx, state } = setup(3);
     rig(state, {

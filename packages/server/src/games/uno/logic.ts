@@ -6,13 +6,13 @@ import {
 } from "@party-hub/shared";
 
 /**
- * UNO ENGINE — deck construction, deterministic dealing, and playability rules.
+ * UNO ENGINE - deck construction, deterministic dealing, and playability rules.
  *
  * DETERMINISM: like Wordle, the initial deck order for a room's hand is derived
  * from a stable seed (roomCode + round + matchEpoch), so a reconnect/refresh
  * reproduces the SAME deal, and "Play again" produces a DIFFERENT one (matchEpoch
  * differs). `seededShuffle` is the same platform-stable Fisher–Yates used
- * everywhere else. The client never runs any of this — only the server does.
+ * everywhere else. The client never runs any of this - only the server does.
  */
 
 export const UNO_COLORS: UnoColor[] = ["red", "yellow", "green", "blue"];
@@ -70,7 +70,7 @@ export function shuffledDeck(roomCode: string, roundNumber: number, matchEpoch: 
  * color and top card, when there is NO pending draw stack.
  *
  *   • Wild is always playable.
- *   • Wild Draw Four is (in this ruleset) always playable — we don't enforce the
+ *   • Wild Draw Four is (in this ruleset) always playable - we don't enforce the
  *     optional "only if you have no matching color" restriction, matching how
  *     most casual/app Uno plays and keeping the UI honest about what's allowed.
  *   • A colored card matches if its color equals the active color, OR its
@@ -92,7 +92,7 @@ export function isPlayable(card: UnoCard, activeColor: UnoColor, topCard: UnoCar
 /**
  * When a draw stack is pending, the ONLY legal plays are cards that extend the
  * same stack: a Draw Two extends a draw_two stack; a Wild Draw Four extends a
- * wild_draw_four stack. (We keep +2 and +4 stacks separate — you can't chain a
+ * wild_draw_four stack. (We keep +2 and +4 stacks separate - you can't chain a
  * +2 onto a +4 or vice-versa, which is the most common stacking house rule.)
  */
 export function canStackOn(card: UnoCard, pendingType: "draw_two" | "wild_draw_four"): boolean {

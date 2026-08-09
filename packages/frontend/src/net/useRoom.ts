@@ -2,10 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   CreateRoomReq,
   CreateRoomRes,
+  DiceOutcome,
   GameEvent,
+  MatchDareOutcome,
+  MatchVote,
+  QuestionSection,
   Result,
   RoomNotice,
   RoomStatePayload,
+  Sex,
   UnoColor,
   WordleConfig,
 } from "@party-hub/shared";
@@ -53,6 +58,21 @@ interface UseRoomResult {
   unoPass: () => Promise<Result<null>>;
   unoCallUno: () => Promise<Result<null>>;
   unoCatch: () => Promise<Result<null>>;
+  /** Guess the Person action senders. */
+  gwChoose: (personId: string) => Promise<Result<null>>;
+  gwAsk: (section: QuestionSection, value: string) => Promise<Result<null>>;
+  gwGuess: (personId: string) => Promise<Result<null>>;
+  gwPass: () => Promise<Result<null>>;
+  /** Match action senders. */
+  matchSetSex: (sex: Sex) => Promise<Result<null>>;
+  matchVote: (cardId: string, vote: MatchVote) => Promise<Result<null>>;
+  matchDareAdvance: (outcome: MatchDareOutcome) => Promise<Result<null>>;
+  matchSafeword: () => Promise<Result<null>>;
+  /** Dice (Dare Roulette) action senders. */
+  diceSetSex: (sex: Sex) => Promise<Result<null>>;
+  diceSpin: () => Promise<Result<null>>;
+  diceResolve: (outcome: DiceOutcome) => Promise<Result<null>>;
+  diceSafeword: () => Promise<Result<null>>;
 }
 
 /**
@@ -209,6 +229,94 @@ export function useRoom(roomCode?: string): UseRoomResult {
     return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "catch_uno" });
   }, []);
 
+  const gwChoose = useCallback(async (personId: string) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { personId: string } }, Result<null>>(sock, "game:action", {
+      type: "choose",
+      payload: { personId },
+    });
+  }, []);
+
+  const gwAsk = useCallback(async (section: QuestionSection, value: string) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { section: QuestionSection; value: string } }, Result<null>>(
+      sock,
+      "game:action",
+      { type: "ask", payload: { section, value } },
+    );
+  }, []);
+
+  const gwGuess = useCallback(async (personId: string) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { personId: string } }, Result<null>>(sock, "game:action", {
+      type: "guess",
+      payload: { personId },
+    });
+  }, []);
+
+  const gwPass = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "pass" });
+  }, []);
+
+  const matchSetSex = useCallback(async (sex: Sex) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { sex: Sex } }, Result<null>>(sock, "game:action", {
+      type: "set_sex",
+      payload: { sex },
+    });
+  }, []);
+
+  const matchVote = useCallback(async (cardId: string, vote: MatchVote) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { cardId: string; vote: MatchVote } }, Result<null>>(
+      sock,
+      "game:action",
+      { type: "vote", payload: { cardId, vote } },
+    );
+  }, []);
+
+  const matchDareAdvance = useCallback(async (outcome: MatchDareOutcome) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { outcome: MatchDareOutcome } }, Result<null>>(
+      sock,
+      "game:action",
+      { type: "dare_advance", payload: { outcome } },
+    );
+  }, []);
+
+  const matchSafeword = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "safeword" });
+  }, []);
+
+  const diceSetSex = useCallback(async (sex: Sex) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { sex: Sex } }, Result<null>>(sock, "game:action", {
+      type: "set_sex",
+      payload: { sex },
+    });
+  }, []);
+
+  const diceSpin = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "spin" });
+  }, []);
+
+  const diceResolve = useCallback(async (outcome: DiceOutcome) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { outcome: DiceOutcome } }, Result<null>>(
+      sock,
+      "game:action",
+      { type: "resolve", payload: { outcome } },
+    );
+  }, []);
+
+  const diceSafeword = useCallback(async () => {
+    const sock = getSocket();
+    return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "safeword" });
+  }, []);
+
   return {
     status,
     room,
@@ -224,6 +332,18 @@ export function useRoom(roomCode?: string): UseRoomResult {
     unoPass,
     unoCallUno,
     unoCatch,
+    gwChoose,
+    gwAsk,
+    gwGuess,
+    gwPass,
+    matchSetSex,
+    matchVote,
+    matchDareAdvance,
+    matchSafeword,
+    diceSetSex,
+    diceSpin,
+    diceResolve,
+    diceSafeword,
   };
 }
 

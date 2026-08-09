@@ -1,6 +1,6 @@
 /**
  * Tiny in-memory sliding-window rate limiter, keyed by an arbitrary string
- * (playerId, ip, or `${playerId}:action`). No external deps — fine for a
+ * (playerId, ip, or `${playerId}:action`). No external deps - fine for a
  * single-instance MVP.
  */
 export class RateLimiter {
@@ -29,7 +29,7 @@ export class RateLimiter {
   }
 
   /**
-   * Drop keys whose most recent hit is older than the window — otherwise a key
+   * Drop keys whose most recent hit is older than the window - otherwise a key
    * that's hit once and never again lingers in the map forever (a slow leak as
    * players come and go). Call this periodically. Returns the count removed.
    */

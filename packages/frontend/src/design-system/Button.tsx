@@ -37,7 +37,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const reduceMotion = useReducedMotion();
   const isDisabled = disabled || loading;
   // Respect prefers-reduced-motion (no springy pop/lift), and don't lift/press a
-  // disabled button — otherwise it snaps out of a hover offset when it disables.
+  // disabled button - otherwise it snaps out of a hover offset when it disables.
   const interactive = !reduceMotion && !isDisabled;
   return (
     <motion.button

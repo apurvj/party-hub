@@ -29,7 +29,7 @@ function answerOf(state: WordleState): string {
   return state.answer;
 }
 
-describe("wordle module — race mode", () => {
+describe("wordle module - race mode", () => {
   it("initializes round 1 with a real 5-letter answer and zeroed scores", () => {
     const { state } = setup();
     expect(state.roundNumber).toBe(1);
@@ -65,7 +65,7 @@ describe("wordle module — race mode", () => {
     const wrong = answer === "PLANT" ? "BREAD" : "PLANT";
     for (let i = 0; i < 6; i++) {
       r = mod.reduce(r.state, { type: "submit_guess", payload: { guess: wrong } }, PB, ctx);
-      // ALREADY_GUESSED will trigger after first; that's fine — just drive state.
+      // ALREADY_GUESSED will trigger after first; that's fine - just drive state.
     }
     view = mod.sanitizeFor(r.state, PA, ctx);
     // A should have the round; answer now revealed since round is over.
@@ -91,7 +91,7 @@ describe("wordle module — race mode", () => {
   });
 });
 
-describe("wordle module — hint", () => {
+describe("wordle module - hint", () => {
   // Six distinct valid words we can feed as non-answer guesses.
   const FILLERS = ["SLATE", "MOUNT", "BRICK", "FLUID", "GHOST", "PLUMB"];
 
@@ -143,7 +143,7 @@ describe("wordle module — hint", () => {
   });
 });
 
-describe("wordle module — between-rounds ready gate", () => {
+describe("wordle module - between-rounds ready gate", () => {
   it("advances only after BOTH players signal ready", () => {
     const { mod, ctx, state } = setup();
     const answer = answerOf(state);
@@ -180,7 +180,7 @@ describe("wordle module — between-rounds ready gate", () => {
   });
 });
 
-describe("wordle module — loser sees the answer", () => {
+describe("wordle module - loser sees the answer", () => {
   it("reveals the answer to the player who did NOT solve first", () => {
     const { mod, ctx, state } = setup();
     const answer = answerOf(state);
@@ -206,7 +206,7 @@ describe("wordle module — loser sees the answer", () => {
   });
 });
 
-describe("wordle module — rematch does not replay the same words", () => {
+describe("wordle module - rematch does not replay the same words", () => {
   it("a new match epoch in the same room yields a different word sequence", () => {
     const mod = createWordleModule({ mode: "race", difficulty: "normal", bestOf: 5 });
 
@@ -241,7 +241,7 @@ describe("wordle module — rematch does not replay the same words", () => {
   });
 });
 
-describe("wordle module — coop mode", () => {
+describe("wordle module - coop mode", () => {
   it("enforces alternating turns on a shared board", () => {
     const { mod, ctx, state } = setup("coop");
     // It's A's turn first; B guessing should be rejected.

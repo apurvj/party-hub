@@ -8,6 +8,9 @@ import { Lobby } from "../components/Lobby.js";
 import { Button, Card, Input } from "../design-system/index.js";
 import { WordleGame } from "../games/wordle/WordleGame.js";
 import { UnoGame } from "../games/uno/UnoGame.js";
+import { GuessWhoGame } from "../games/guessWho/GuessWhoGame.js";
+import { MatchGame } from "../games/match/MatchGame.js";
+import { DiceGame } from "../games/dice/DiceGame.js";
 import { getNickname, setNickname } from "../net/identity.js";
 import { useRoom } from "../net/useRoom.js";
 
@@ -20,7 +23,7 @@ export function RoomPage() {
   // Gate: a player must have a nickname BEFORE we connect. Someone opening a
   // shared link has never passed through Home, so without this they'd be
   // auto-joined on the handshake as the default "Player". We hold the code back
-  // from useRoom (pass `undefined`) until they've named themselves — that keeps
+  // from useRoom (pass `undefined`) until they've named themselves - that keeps
   // the socket from auto-joining, then the identity change re-handshakes cleanly.
   const [nickname, setNick] = useState(() => getNickname());
   const hasNickname = nickname.trim().length > 0;
@@ -39,6 +42,18 @@ export function RoomPage() {
     unoPass,
     unoCallUno,
     unoCatch,
+    gwChoose,
+    gwAsk,
+    gwGuess,
+    gwPass,
+    matchSetSex,
+    matchVote,
+    matchDareAdvance,
+    matchSafeword,
+    diceSetSex,
+    diceSpin,
+    diceResolve,
+    diceSafeword,
   } = useRoom(valid && hasNickname ? code : undefined);
 
   // Joining is driven by the socket handshake: `useRoom(code)` connects with the
@@ -55,7 +70,7 @@ export function RoomPage() {
   const [joinError, setJoinError] = useState<string | null>(null);
   useEffect(() => setJoinError(null), [code]);
   useEffect(() => {
-    // Don't attempt a fallback join until we actually have a nickname — before
+    // Don't attempt a fallback join until we actually have a nickname - before
     // that useRoom holds the code back, so the socket is connected but room-less
     // and a join would be rejected with NICKNAME_REQUIRED.
     if (!valid || !hasNickname || room || status !== "connected") return;
@@ -135,6 +150,39 @@ export function RoomPage() {
             onCallUno={unoCallUno}
             onCatch={unoCatch}
             onNextRound={nextRound}
+            onRematch={rematch}
+          />
+        ) : room.game && room.game.gameId === "guess-the-person" ? (
+          <GuessWhoGame
+            room={room}
+            game={room.game}
+            lastEvent={lastEvent}
+            onChoose={gwChoose}
+            onAsk={gwAsk}
+            onGuess={gwGuess}
+            onPass={gwPass}
+            onNextRound={nextRound}
+            onRematch={rematch}
+          />
+        ) : room.game && room.game.gameId === "match" ? (
+          <MatchGame
+            room={room}
+            game={room.game}
+            onSetSex={matchSetSex}
+            onVote={matchVote}
+            onDareAdvance={matchDareAdvance}
+            onSafeword={matchSafeword}
+            onNextRound={nextRound}
+            onRematch={rematch}
+          />
+        ) : room.game && room.game.gameId === "dice" ? (
+          <DiceGame
+            room={room}
+            game={room.game}
+            onSetSex={diceSetSex}
+            onSpin={diceSpin}
+            onResolve={diceResolve}
+            onSafeword={diceSafeword}
             onRematch={rematch}
           />
         ) : (

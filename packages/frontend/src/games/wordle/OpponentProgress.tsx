@@ -9,7 +9,7 @@ const dot: Record<LetterState, string> = {
 };
 
 /**
- * Opponent's board rendered as colored blocks only — you feel the race without
+ * Opponent's board rendered as colored blocks only - you feel the race without
  * seeing their letters (which would leak the answer). This mirrors the classic
  * shared-Wordle "emoji grid".
  */

@@ -1,11 +1,11 @@
 /**
- * cyrb53 — a small, fast, stable 53-bit string hash by bryc (public domain).
+ * cyrb53 - a small, fast, stable 53-bit string hash by bryc (public domain).
  * https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js
  *
  * WHY THIS MATTERS FOR PARTY HUB:
  * The Wordle answer for a given round is chosen deterministically from a seed
  * string via `cyrb53(seed) % answerList.length`. This hash produces the SAME
- * output in Node (server) and the browser, and never changes between runs — so
+ * output in Node (server) and the browser, and never changes between runs - so
  * both players always resolve to the same word, and a refresh / shared-URL
  * reconnect re-derives the identical word. Do NOT swap this for Math.random or
  * anything Date-based: determinism is the whole point.

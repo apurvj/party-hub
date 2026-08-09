@@ -11,7 +11,7 @@ const DATA_DIR = join(__dirname, "data");
  * WORD LIST INTEGRITY (see plan §"same word" invariant #4):
  * Answer lists are immutable + versioned. The version string is folded into the
  * word-selection seed, so if a list is ever replaced the mapping intentionally
- * changes for NEW rooms — but any in-flight room keeps deriving its word from
+ * changes for NEW rooms - but any in-flight room keeps deriving its word from
  * the same seed, so a refresh/reconnect always yields the identical word. We
  * also log a content hash at startup so accidental reordering is detectable.
  */
@@ -64,7 +64,7 @@ const answersByTier: Record<WordleDifficulty, string[]> = (() => {
 const validGuesses: Set<string> = (() => {
   const s = new Set<string>();
   for (const w of guessArray) s.add(w.toUpperCase());
-  // Answers are already uppercased in `answersByTier.normal` (the full pool) —
+  // Answers are already uppercased in `answersByTier.normal` (the full pool) -
   // reuse it instead of re-uppercasing every answer a second time.
   for (const w of answersByTier.normal) s.add(w);
   return s;

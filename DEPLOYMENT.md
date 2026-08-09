@@ -7,8 +7,9 @@ Party Hub has two deployable pieces:
   **Render** or **Fly.io**
 
 They talk over WebSockets, so two things must line up:
-1. The frontend must know the server URL — set `VITE_SERVER_URL` at build time.
-2. The server must allow the frontend's origin — set `CLIENT_ORIGIN` (CORS allow-list).
+
+1. The frontend must know the server URL - set `VITE_SERVER_URL` at build time.
+2. The server must allow the frontend's origin - set `CLIENT_ORIGIN` (CORS allow-list).
 
 > ⚠️ The server keeps rooms **in memory**, so run a **single instance** (no horizontal
 > scaling / autoscaling to multiple machines). Multiple instances would each hold
@@ -21,7 +22,7 @@ They talk over WebSockets, so two things must line up:
 
 You need the server URL before building the frontend, so start here.
 
-### Option A — Render (simplest)
+### Option A - Render (simplest)
 
 The repo includes [`render.yaml`](render.yaml).
 
@@ -32,17 +33,17 @@ The repo includes [`render.yaml`](render.yaml).
 4. After the first deploy you'll have a URL like
    `https://party-hub-server.onrender.com`. **Copy it.**
 5. Set the `CLIENT_ORIGIN` env var (in the Render dashboard) to your Vercel URL once
-   you have it (step 2 below) — e.g. `https://party-hub.vercel.app` — and redeploy.
+   you have it (step 2 below) - e.g. `https://party-hub.vercel.app` - and redeploy.
 
 > Render's free tier sleeps on inactivity; the first request after idle takes a few
 > seconds to wake. Fine for casual play.
 
-### Option B — Fly.io
+### Option B - Fly.io
 
 The repo includes [`fly.toml`](fly.toml) and a [`Dockerfile`](Dockerfile).
 
 ```bash
-fly launch --no-deploy        # once — creates the app from fly.toml
+fly launch --no-deploy        # once - creates the app from fly.toml
 fly secrets set CLIENT_ORIGIN=https://party-hub.vercel.app
 fly deploy
 ```
@@ -82,7 +83,7 @@ redeploy the server. Without this the browser will refuse the WebSocket connecti
 
 - Server health: `curl https://<your-server>/health` → `{"ok":true,"rooms":0}`
 - Open the Vercel URL, create a room, and open the shared link on **another device /
-  network**. You should be able to complete a match. Refresh mid-game — your board
+  network**. You should be able to complete a match. Refresh mid-game - your board
   should come right back.
 - Optional: point the E2E smoke test at prod:
   `SERVER_URL=https://<your-server> pnpm --filter @party-hub/server run e2e`
@@ -92,21 +93,23 @@ redeploy the server. Without this the browser will refuse the WebSocket connecti
 ## Environment variables
 
 ### Frontend (`packages/frontend/.env.example`)
-| Var | Purpose |
-| --- | --- |
+
+| Var               | Purpose                                   |
+| ----------------- | ----------------------------------------- |
 | `VITE_SERVER_URL` | URL of the Socket.io server (build-time). |
 
 ### Server (`packages/server/.env.example`)
-| Var | Default | Purpose |
-| --- | --- | --- |
-| `PORT` | `3001` | Listen port (hosts inject this). |
-| `CLIENT_ORIGIN` | localhost dev origins | Comma-separated CORS allow-list. |
-| `SEAT_GRACE_MS` | `45000` | How long a disconnected player keeps their seat. |
-| `ROOM_TTL_MS` | `7200000` | Idle-room lifetime before cleanup. |
-| `CLEANUP_INTERVAL_MS` | `300000` | Cleanup sweep interval. |
-| `MAX_GUESSES_PER_SEC` | `4` | Per-player guess rate limit. |
-| `MAX_ROOM_CREATES_PER_MIN` | `15` | Per-player room-create rate limit. |
-| `MAX_JOINS_PER_MIN` | `30` | Per-player join rate limit. |
+
+| Var                        | Default               | Purpose                                          |
+| -------------------------- | --------------------- | ------------------------------------------------ |
+| `PORT`                     | `3001`                | Listen port (hosts inject this).                 |
+| `CLIENT_ORIGIN`            | localhost dev origins | Comma-separated CORS allow-list.                 |
+| `SEAT_GRACE_MS`            | `45000`               | How long a disconnected player keeps their seat. |
+| `ROOM_TTL_MS`              | `7200000`             | Idle-room lifetime before cleanup.               |
+| `CLEANUP_INTERVAL_MS`      | `300000`              | Cleanup sweep interval.                          |
+| `MAX_GUESSES_PER_SEC`      | `4`                   | Per-player guess rate limit.                     |
+| `MAX_ROOM_CREATES_PER_MIN` | `15`                  | Per-player room-create rate limit.               |
+| `MAX_JOINS_PER_MIN`        | `30`                  | Per-player join rate limit.                      |
 
 ---
 

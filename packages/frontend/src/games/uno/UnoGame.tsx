@@ -33,7 +33,7 @@ const COLOR_SWATCH: Record<UnoColor, string> = {
   blue: "bg-[#1f5fd6]",
 };
 
-/** Raw hex per color — used for the active-color glow around the discard pile. */
+/** Raw hex per color - used for the active-color glow around the discard pile. */
 const COLOR_HEX: Record<UnoColor, string> = {
   red: "#f04a43",
   yellow: "#ffc933",
@@ -141,14 +141,16 @@ export function UnoGame({
   const doCatch = useCallback(async () => {
     const res = await onCatch();
     if (!res.ok) show(res.error.message, "warning");
-    else show("Caught them! +2", "success");
+    else show("Caught them! +5 cards", "success");
   }, [onCatch, show]);
 
   const myScore = mySeat === "A" ? game.scores.A : game.scores.B;
   const oppScore = mySeat === "A" ? game.scores.B : game.scores.A;
 
-  // You should call UNO when you're about to be / are on one card and haven't.
-  const shouldOfferUnoCall = game.hand.length === 1 && !game.youCalledUno && !roundOver;
+  // Call UNO as you're about to go down to one card: offered at TWO cards (call
+  // it before you lay your second-to-last down) and still at one as a grace.
+  const shouldOfferUnoCall =
+    (game.hand.length === 2 || game.hand.length === 1) && !game.youCalledUno && !roundOver;
 
   return (
     <div className="relative pt-2">
@@ -169,7 +171,7 @@ export function UnoGame({
           {opponent ? (
             <PlayerBadge nickname={opponent.nickname} connected={opponent.connected} size="sm" />
           ) : (
-            <span className="text-xs text-ink-mute">—</span>
+            <span className="text-xs text-ink-mute">-</span>
           )}
         </div>
       </div>
@@ -196,12 +198,40 @@ export function UnoGame({
             <UnoCardBack key={i} size="sm" />
           ))}
         </div>
-        {game.canCatchOpponent && (
-          <Button size="sm" variant="danger" onClick={() => void doCatch()}>
-            Catch! ✋
-          </Button>
-        )}
       </div>
+
+      {/* Prominent CATCH call-to-action - the opponent is on one card and hasn't
+          called UNO. A full-width, pulsing banner so it can't be missed. */}
+      <AnimatePresence>
+        {game.canCatchOpponent && (
+          <motion.button
+            type="button"
+            onClick={() => void doCatch()}
+            initial={{ opacity: 0, y: -10, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 420, damping: 24 }}
+            className="mx-auto mb-4 flex w-full max-w-lg items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-danger to-[#ff7a4d] px-5 py-3.5 text-white shadow-e4 outline-none ring-danger/40 transition-transform hover:scale-[1.02] focus-visible:ring-4"
+          >
+            <motion.span
+              className="grid h-9 w-9 place-items-center rounded-full bg-white/25 text-xl"
+              animate={{ rotate: [0, -18, 18, 0] }}
+              transition={{ repeat: Infinity, repeatDelay: 0.8, duration: 0.6 }}
+              aria-hidden
+            >
+              ✋
+            </motion.span>
+            <span className="text-left leading-tight">
+              <span className="block font-display text-base font-extrabold">
+                Catch {opponent?.nickname ?? "them"}!
+              </span>
+              <span className="block text-xs font-medium text-white/85">
+                They're on one card and forgot to call UNO - hit them with +5
+              </span>
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Table: a felt play surface holding the draw pile + discard + active color */}
       <div
@@ -211,7 +241,7 @@ export function UnoGame({
             "radial-gradient(ellipse at 50% 35%, #2f9d5b 0%, #1f7d47 55%, #14663a 100%)",
         }}
       >
-        {/* Draw pile — stacked backs for depth, whole stack is the draw button. */}
+        {/* Draw pile - stacked backs for depth, whole stack is the draw button. */}
         <div className="flex flex-col items-center gap-2">
           <button
             type="button"
@@ -286,7 +316,7 @@ export function UnoGame({
         >
           {game.pendingDraw > 0 ? (
             <span>
-              Stacked penalty <b>+{game.pendingDraw}</b> —{" "}
+              Stacked penalty <b>+{game.pendingDraw}</b> -{" "}
               {myTurn ? "stack a matching card or draw the pile" : "waiting on opponent"}
             </span>
           ) : myTurn ? (
@@ -300,7 +330,7 @@ export function UnoGame({
         </motion.div>
       </div>
 
-      {/* Your hand — a subtle tray with a label + live count. */}
+      {/* Your hand - a subtle tray with a label + live count. */}
       <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-surface-2/60 px-3 pb-3 pt-2">
         <div className="mb-1.5 flex items-center justify-between px-1">
           <span className="text-xs font-semibold uppercase tracking-wide text-ink-mute">Your hand</span>
@@ -467,7 +497,7 @@ function UnoRoundOverlay({
             </Button>
           ) : (
             <Button fullWidth size="lg" loading={readying} onClick={() => void clickNext()}>
-              {game.opponentReady ? `${opponentName} is ready — Next round →` : "I'm ready →"}
+              {game.opponentReady ? `${opponentName} is ready - Next round →` : "I'm ready →"}
             </Button>
           )}
         </div>

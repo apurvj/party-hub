@@ -20,7 +20,7 @@ export function RoomCodePill({ code, shareUrl }: RoomCodePillProps) {
       show(shareUrl ? "Invite link copied!" : "Room code copied!", "success");
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
-      show("Couldn't copy — long-press to copy manually.", "warning");
+      show("Couldn't copy - long-press to copy manually.", "warning");
     }
   };
 

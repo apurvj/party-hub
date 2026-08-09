@@ -3,7 +3,7 @@ import type { CardColor, PublicCard, UnoCard, UnoCardKind } from "@party-hub/sha
 import { cx } from "../../design-system/index.js";
 
 /**
- * Vivid Uno face colors — fixed (not theme vars) so cards read as real Uno.
+ * Vivid Uno face colors - fixed (not theme vars) so cards read as real Uno.
  * Each color carries a base + a slightly darker shade for a subtle top-down
  * gradient, giving the plastic-card sheen instead of a flat fill.
  */
@@ -14,7 +14,7 @@ const COLOR_BG: Record<Exclude<CardColor, null>, string> = {
   blue: "bg-[linear-gradient(150deg,#3f83ee_0%,#1f5fd6_60%,#1348ac_100%)]",
 };
 
-/** The glyph color drawn on the center oval — matches the card body. */
+/** The glyph color drawn on the center oval - matches the card body. */
 const COLOR_INK: Record<Exclude<CardColor, null>, string> = {
   red: "text-[#d81e18]",
   yellow: "text-[#e5a100]",
@@ -149,7 +149,7 @@ export function UnoCardView({
     >
       {isWild && <WildPinwheel />}
 
-      {/* Diagonal white oval — the signature Uno face plate. */}
+      {/* Diagonal white oval - the signature Uno face plate. */}
       <span
         className={cx(
           "absolute grid place-items-center rounded-[50%] bg-white/95 shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]",
@@ -164,7 +164,7 @@ export function UnoCardView({
         </span>
       </span>
 
-      {/* Corner indices: top-left upright, bottom-right mirrored — like a real card. */}
+      {/* Corner indices: top-left upright, bottom-right mirrored - like a real card. */}
       <span className={cx("absolute left-1 top-0.5 leading-none text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]", s.corner)} aria-hidden>
         {corner}
       </span>
@@ -183,7 +183,7 @@ export function UnoCardView({
 
 /**
  * Face-down card back: dark body, the diagonal red oval, and the italic "UNO"
- * wordmark — the look everyone recognizes from across the table.
+ * wordmark - the look everyone recognizes from across the table.
  */
 export function UnoCardBack({
   size = "md",
@@ -202,7 +202,7 @@ export function UnoCardBack({
       )}
       aria-hidden
     >
-      {/* A wide red band cutting diagonally across the card — the classic back. */}
+      {/* A wide red band cutting diagonally across the card - the classic back. */}
       <span
         className="absolute left-1/2 top-1/2 h-[46%] w-[150%] -translate-x-1/2 -translate-y-1/2 bg-[#d81e18] shadow-[inset_0_1px_3px_rgba(0,0,0,0.35)]"
         style={{ transform: "translate(-50%, -50%) rotate(-32deg)" }}

@@ -5,7 +5,7 @@ const copy: Record<ConnStatus, { text: string; tone: string } | null> = {
   connected: null,
   connecting: { text: "Connecting…", tone: "bg-info" },
   reconnecting: { text: "Reconnecting…", tone: "bg-warning" },
-  disconnected: { text: "Connection lost — retrying…", tone: "bg-danger" },
+  disconnected: { text: "Connection lost - retrying…", tone: "bg-danger" },
 };
 
 /** Slim banner that only shows when something's off with the connection. */

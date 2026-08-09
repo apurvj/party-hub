@@ -18,7 +18,7 @@ export interface GameContext {
   seatOf: (playerId: string) => Seat | null;
   playerIdOf: (seat: Seat) => string | null;
   /**
-   * How many times this room has (re)started the game — 0 for the first match,
+   * How many times this room has (re)started the game - 0 for the first match,
    * incremented on every "Play again"/rematch. Games fold this into any
    * deterministic content selection (e.g. Wordle's word seed) so a rematch in
    * the SAME room doesn't replay the identical sequence of words/deals. It stays
@@ -32,7 +32,7 @@ export interface GameContext {
  * The result of applying one action.
  *
  * CONTRACT: `error` and `events`/`nextPhase` are mutually exclusive. If `error`
- * is set the action was rejected — `state` MUST be the unchanged input state and
+ * is set the action was rejected - `state` MUST be the unchanged input state and
  * the engine broadcasts nothing (it only relays the error to the acting player
  * via the ack). A successful reduce sets `events`/`nextPhase` and leaves `error`
  * undefined. The `RejectedReduce | AcceptedReduce` union below makes this
@@ -64,7 +64,7 @@ export interface GameModule<S, A, V> {
 
   /**
    * Apply a player's action. MUST be pure w.r.t. inputs (no Date.now/random for
-   * anything that affects derived state — determinism matters for replay).
+   * anything that affects derived state - determinism matters for replay).
    */
   reduce(state: S, action: A, playerId: string, ctx: GameContext): ReduceResult<S>;
 

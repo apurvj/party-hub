@@ -7,15 +7,24 @@ export function Lobby({ room, shareUrl }: { room: RoomStatePayload; shareUrl: st
   const opponent = room.players.find((p) => !p.isYou) ?? null;
 
   const isUno = room.gameId === "uno";
+  const isGuessWho = room.gameId === "guess-the-person";
   const label = isUno
     ? "Uno"
-    : room.config.wordle.mode === "coop"
-      ? "Co-op Wordle"
-      : "Race Wordle";
-  const bestOf = isUno ? room.config.uno.bestOf : room.config.wordle.bestOf;
+    : isGuessWho
+      ? "Guess the Person"
+      : room.config.wordle.mode === "coop"
+        ? "Co-op Wordle"
+        : "Race Wordle";
+  const bestOf = isUno
+    ? room.config.uno.bestOf
+    : isGuessWho
+      ? room.config["guess-the-person"].bestOf
+      : room.config.wordle.bestOf;
   const tagline = isUno
     ? `Best of ${bestOf} • Stacking on • Refresh-safe`
-    : `Best of ${bestOf} • Same word for both players • Refresh-safe`;
+    : isGuessWho
+      ? `Best of ${bestOf} • Take turns, then guess • Refresh-safe`
+      : `Best of ${bestOf} • Same word for both players • Refresh-safe`;
 
   return (
     <div className="mx-auto max-w-lg pt-6">

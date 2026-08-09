@@ -8,7 +8,7 @@ function fb(guess: string, answer: string): string {
     .join("");
 }
 
-describe("computeFeedback — duplicate-letter handling", () => {
+describe("computeFeedback - duplicate-letter handling", () => {
   it("all correct", () => {
     expect(fb("CRANE", "CRANE")).toBe("GGGGG");
   });
@@ -17,19 +17,19 @@ describe("computeFeedback — duplicate-letter handling", () => {
     expect(fb("FUZZY", "CRIMP")).toBe("BBBBB");
   });
 
-  it("LLAMA vs LEVEL — extra L should be present once, second A absent", () => {
+  it("LLAMA vs LEVEL - extra L should be present once, second A absent", () => {
     // L(0)=G (LEVEL[0]=L). Answer L budget now 1.
     // L(1): present (budget→0). A(2): absent. M(3): absent. A(4): absent.
     expect(fb("LLAMA", "LEVEL")).toBe("GYBBB");
   });
 
-  it("SPEED vs ABIDE — one E present, the other absent", () => {
+  it("SPEED vs ABIDE - one E present, the other absent", () => {
     // ABIDE has one E (position 4). SPEED has E at 2 and 3.
     // S:B P:B E(2): present (budget E=1→0) E(3): absent D(4): present? D in ABIDE at 3 → present
     expect(fb("SPEED", "ABIDE")).toBe("BBYBY");
   });
 
-  it("GEESE vs THESE — greens consume budget before yellows", () => {
+  it("GEESE vs THESE - greens consume budget before yellows", () => {
     // THESE: T H E S E. GEESE: G E E S E.
     // pos0 G vs T: not correct. pos1 E vs H: not. pos2 E vs E: G. pos3 S vs S: G. pos4 E vs E: G.
     // Remaining answer letters (non-green): T,H. Guess non-green: G(0),E(1).
@@ -49,7 +49,7 @@ describe("computeFeedback — duplicate-letter handling", () => {
   });
 });
 
-describe("selectWord — determinism (the core requirement)", () => {
+describe("selectWord - determinism (the core requirement)", () => {
   it("same room + round + difficulty → identical word every call", () => {
     const w1 = selectWord("ABC123", 1, "normal");
     const w2 = selectWord("ABC123", 1, "normal");

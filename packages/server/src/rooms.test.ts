@@ -1,10 +1,21 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_WORDLE_CONFIG } from "@party-hub/shared";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  DEFAULT_DICE_CONFIG,
+  DEFAULT_GUESS_WHO_CONFIG,
+  DEFAULT_MATCH_CONFIG,
+  DEFAULT_WORDLE_CONFIG,
+} from "@party-hub/shared";
 import { RoomManager, type RoomEmitter } from "./rooms.js";
 import type { GameConfigs } from "./registry.js";
 import type { UnoState } from "./games/uno/module.js";
 
-const CONFIGS: GameConfigs = { wordle: DEFAULT_WORDLE_CONFIG, uno: { bestOf: 1 } };
+const CONFIGS: GameConfigs = {
+  wordle: DEFAULT_WORDLE_CONFIG,
+  uno: { bestOf: 1 },
+  "guess-the-person": DEFAULT_GUESS_WHO_CONFIG,
+  match: DEFAULT_MATCH_CONFIG,
+  dice: DEFAULT_DICE_CONFIG,
+};
 
 function silentEmitter(): RoomEmitter {
   return { emitRoomState: vi.fn(), emitGameEvent: vi.fn(), emitNotice: vi.fn() };
@@ -18,7 +29,7 @@ function twoPlayerUnoRoom(mgr: RoomManager) {
   return room.code;
 }
 
-describe("RoomManager — seating + join", () => {
+describe("RoomManager - seating + join", () => {
   let mgr: RoomManager;
   beforeEach(() => (mgr = new RoomManager(silentEmitter())));
 
@@ -55,7 +66,79 @@ describe("RoomManager — seating + join", () => {
   });
 });
 
-describe("RoomManager — action gating", () => {
+describe("RoomManager - seat takeover after a player leaves", () => {
+  let mgr: RoomManager;
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mgr = new RoomManager(silentEmitter());
+  });
+  afterEach(() => vi.useRealTimers());
+
+  /** Seat two players into a fresh Match room; returns the code. */
+  function twoPlayerMatchRoom(): string {
+    const room = mgr.createRoom("match", CONFIGS);
+    mgr.join(room.code, "P_A", "Alice");
+    mgr.join(room.code, "P_B", "Bob");
+    return room.code;
+  }
+
+  it("starts a clean match (no stale body/state) when a newcomer fills a vacated seat", () => {
+    const code = twoPlayerMatchRoom();
+    const room = mgr.getRoom(code)!;
+    const epochBefore = room.matchEpoch;
+
+    // Alice declares her body; the match is now mid-setup with A's sex baked in.
+    expect(mgr.action(code, "P_A", { type: "set_sex", payload: { sex: "female" } }).ok).toBe(true);
+    const midA = mgr.getSnapshot(code, "P_A")!.game!;
+    if (midA.gameId === "match") expect(midA.yourSex).toBe("female");
+
+    // Bob leaves for good: disconnect, then let the grace window lapse so his seat frees.
+    mgr.handleDisconnect(code, "P_B");
+    vi.advanceTimersByTime(60_000);
+    expect(room.seats.B).toBeNull();
+    expect(room.players.has("P_B")).toBe(false);
+
+    // A brand-new player takes the freed seat.
+    const join = mgr.join(code, "P_C", "Carol");
+    expect(join.ok).toBe(true);
+
+    // The match was reset for the new pairing: fresh epoch, back to the consent
+    // gate for BOTH (no declared bodies carried over), and Carol never inherits
+    // Alice's prior state.
+    expect(room.matchEpoch).toBe(epochBefore + 1);
+    const afterA = mgr.getSnapshot(code, "P_A")!.game!;
+    const afterC = mgr.getSnapshot(code, "P_C")!.game!;
+    if (afterA.gameId === "match") {
+      expect(afterA.stage).toBe("setup");
+      expect(afterA.yourSex).toBeNull(); // Alice must re-declare with her new partner
+    }
+    if (afterC.gameId === "match") {
+      expect(afterC.stage).toBe("setup");
+      expect(afterC.yourSex).toBeNull();
+    }
+  });
+
+  it("a normal reconnect (grace not lapsed) keeps the match intact", () => {
+    const code = twoPlayerMatchRoom();
+    const room = mgr.getRoom(code)!;
+    mgr.action(code, "P_A", { type: "set_sex", payload: { sex: "female" } });
+    const epochBefore = room.matchEpoch;
+
+    // Bob blips and returns within the grace window - NOT a takeover.
+    mgr.handleDisconnect(code, "P_B");
+    vi.advanceTimersByTime(1_000);
+    const back = mgr.join(code, "P_B", "Bob");
+    expect(back.ok).toBe(true);
+    if (back.ok) expect(back.reconnected).toBe(true);
+
+    // Same match: epoch unchanged and Alice's declared body still stands.
+    expect(room.matchEpoch).toBe(epochBefore);
+    const afterA = mgr.getSnapshot(code, "P_A")!.game!;
+    if (afterA.gameId === "match") expect(afterA.yourSex).toBe("female");
+  });
+});
+
+describe("RoomManager - action gating", () => {
   let mgr: RoomManager;
   beforeEach(() => (mgr = new RoomManager(silentEmitter())));
 
@@ -76,7 +159,7 @@ describe("RoomManager — action gating", () => {
   it("does NOT mutate committed state when reduce returns an error", () => {
     const code = twoPlayerUnoRoom(mgr);
     const before = JSON.stringify(mgr.getRoom(code)!.gameState);
-    // Off-turn player (B) tries to draw — rejected, no state change.
+    // Off-turn player (B) tries to draw - rejected, no state change.
     const res = mgr.action(code, "P_B", { type: "draw_card" });
     expect(res.ok).toBe(false);
     const after = JSON.stringify(mgr.getRoom(code)!.gameState);
@@ -84,7 +167,7 @@ describe("RoomManager — action gating", () => {
   });
 });
 
-describe("RoomManager — rematch gate", () => {
+describe("RoomManager - rematch gate", () => {
   let mgr: RoomManager;
   beforeEach(() => (mgr = new RoomManager(silentEmitter())));
 
@@ -121,7 +204,8 @@ describe("RoomManager — rematch gate", () => {
     expect(room.matchEpoch).toBe(epochBefore + 1); // fresh seed → different deal
     expect(room.phase).toBe("in_game");
     const fresh = mgr.getSnapshot(code, "P_A")!.game!;
-    expect(fresh.roundNumber).toBe(1);
+    expect(fresh.gameId).toBe("uno");
+    if (fresh.gameId === "uno") expect(fresh.roundNumber).toBe(1);
   });
 
   it("rejects rematch from a non-member", () => {

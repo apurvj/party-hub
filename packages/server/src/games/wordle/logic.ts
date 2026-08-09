@@ -16,7 +16,7 @@ import { getAnswerPool, WORDLIST_VERSION } from "./wordlist.js";
  *   2. Second pass: for each non-correct letter, mark "present" only if there's
  *      still budget for that letter left; otherwise "absent".
  *
- * Example — guess "LLAMA" vs answer "LEVEL":
+ * Example - guess "LLAMA" vs answer "LEVEL":
  *   L at 0 → correct (LEVEL[0]=L). Budget for L now 1 (LEVEL has 2 L's, one used).
  *   L at 1 → not correct; budget L=1 → "present" (consumes it → 0).
  *   A at 2 → answer has 0 A → "absent".

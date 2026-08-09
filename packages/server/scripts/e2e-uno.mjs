@@ -2,14 +2,14 @@
  * End-to-end smoke test for UNO over the real Socket.io protocol. Proves the
  * core requirements against a running server (default http://localhost:3001):
  *
- *   1. SEATING — two players auto-join a private room and the hand starts.
- *   2. ANTI-CHEAT — a player's payload never contains the OPPONENT's hand cards
+ *   1. SEATING - two players auto-join a private room and the hand starts.
+ *   2. ANTI-CHEAT - a player's payload never contains the OPPONENT's hand cards
  *      nor the draw-pile order (only its own hand + an opponent COUNT).
- *   3. TURN RULES — the player whose turn it ISN'T cannot play.
- *   4. REFRESH-SAFE — a reconnect (same playerId) replays the identical hand,
+ *   3. TURN RULES - the player whose turn it ISN'T cannot play.
+ *   4. REFRESH-SAFE - a reconnect (same playerId) replays the identical hand,
  *      top card and turn; the deterministic deal is unchanged.
- *   5. UNO CALL — calling UNO on one card is visible to the opponent.
- *   6. ROUND RESOLUTION — driving a full hand ends with a winner both agree on,
+ *   5. UNO CALL - calling UNO on one card is visible to the opponent.
+ *   6. ROUND RESOLUTION - driving a full hand ends with a winner both agree on,
  *      and the winner's score increments.
  *
  * Run: node packages/server/scripts/e2e-uno.mjs   (server must be running)
@@ -24,7 +24,7 @@ let failures = 0;
 function check(label, cond, detail = "") {
   const mark = cond ? "✓" : "✗";
   if (!cond) failures++;
-  console.log(`  ${mark} ${label}${detail ? ` — ${detail}` : ""}`);
+  console.log(`  ${mark} ${label}${detail ? ` - ${detail}` : ""}`);
 }
 
 /** A thin client wrapper that always tracks the latest room:state snapshot. */
@@ -66,7 +66,7 @@ const act = (client, action) => emitAck(client, "game:action", action);
 
 /**
  * Play one legal turn for `actor`. Uses only what the sanitized view exposes
- * (playableCardIds, hasDrawn, pendingDraw) — never any hidden state — exactly as
+ * (playableCardIds, hasDrawn, pendingDraw) - never any hidden state - exactly as
  * the real UI does. Returns a short tag describing what it did (for logging).
  */
 async function takeTurn(actor) {
@@ -188,9 +188,9 @@ async function main() {
   }
   await waitFor(A2, (s) => s.game && s.game.hand.length === 7, "A2 hand replayed");
   const handAfter = A2.state.game.hand.map((c) => c.id).sort();
-  check("REFRESH-SAFE — identical hand after reconnect", JSON.stringify(handAfter) === JSON.stringify(handBefore));
-  check("REFRESH-SAFE — same top card", A2.state.game.topCard.id === topBefore, `${A2.state.game.topCard.id} vs ${topBefore}`);
-  check("REFRESH-SAFE — same turn", A2.state.game.turn === turnBefore);
+  check("REFRESH-SAFE - identical hand after reconnect", JSON.stringify(handAfter) === JSON.stringify(handBefore));
+  check("REFRESH-SAFE - same top card", A2.state.game.topCard.id === topBefore, `${A2.state.game.topCard.id} vs ${topBefore}`);
+  check("REFRESH-SAFE - same turn", A2.state.game.turn === turnBefore);
 
   // --- DRIVE A FULL HAND to a winner, observing UNO calls propagate ---
   const seatOf = (c) => c.state.yourSeat;

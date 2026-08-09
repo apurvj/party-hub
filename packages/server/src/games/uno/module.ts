@@ -19,6 +19,9 @@ import {
 } from "@party-hub/shared";
 import { canStackOn, isPlayable, shuffledDeck, STARTING_HAND, UNO_COLORS } from "./logic.js";
 
+/** Cards drawn by a player caught on one card without having called UNO. */
+const CATCH_PENALTY = 5;
+
 /**
  * Full server-side Uno state (2-player). NOT sent to clients as-is: both hands
  * and the draw-pile order are secret. `sanitizeFor` projects the per-player
@@ -30,7 +33,7 @@ export interface UnoState {
   config: UnoConfig;
   roundNumber: number;
 
-  /** Seed inputs for deterministic (re)shuffles — fixed for a match's life. */
+  /** Seed inputs for deterministic (re)shuffles - fixed for a match's life. */
   roomCode: string;
   matchEpoch: number;
 
@@ -74,7 +77,7 @@ function topOf(state: UnoState): UnoCard {
 /**
  * Reshuffle the discard pile (all but the current top) back into the draw pile
  * when it runs dry. Uses a seeded shuffle keyed by a per-match/round/reshuffle
- * counter — never Math.random — so the reducer stays replay-safe.
+ * counter - never Math.random - so the reducer stays replay-safe.
  */
 function reshuffle(state: UnoState): void {
   if (state.discard.length <= 1) return; // nothing to recycle
@@ -94,7 +97,7 @@ function drawOne(state: UnoState): UnoCard | null {
 function drawInto(state: UnoState, seat: Seat, n: number): void {
   for (let i = 0; i < n; i++) {
     const card = drawOne(state);
-    if (!card) break; // both piles exhausted — nothing more to draw
+    if (!card) break; // both piles exhausted - nothing more to draw
     state.hands[seat].push(card);
   }
   state.calledUno[seat] = false;
@@ -204,7 +207,7 @@ function applyDraw(state: UnoState, seat: Seat): ActionResult {
   if (state.roundOver) return reject(ErrorCode.GAME_NOT_ACTIVE);
   if (state.turn !== seat) return reject(ErrorCode.NOT_YOUR_TURN);
 
-  // Facing a draw stack: take the whole accumulated penalty. House rule — taking
+  // Facing a draw stack: take the whole accumulated penalty. House rule - taking
   // the penalty does NOT forfeit your turn. You've now "drawn" for the turn, so
   // you may play any playable card (including one you just drew: a matching color,
   // a Draw Two, a Wild, or a Wild Draw Four) or pass. This mirrors the normal
@@ -223,7 +226,7 @@ function applyDraw(state: UnoState, seat: Seat): ActionResult {
   const card = drawOne(state);
   state.calledUno[seat] = false;
   if (!card) {
-    // Both piles empty — can't draw; end the turn rather than deadlock.
+    // Both piles empty - can't draw; end the turn rather than deadlock.
     state.turn = otherSeat(seat);
     state.hasDrawn = false;
     state.drawnCardId = null;
@@ -248,7 +251,12 @@ function applyPass(state: UnoState, seat: Seat): ActionResult {
 
 function applyCallUno(state: UnoState, seat: Seat): ActionResult {
   if (state.roundOver) return reject(ErrorCode.GAME_NOT_ACTIVE);
-  if (state.hands[seat].length !== 1) return reject(ErrorCode.INVALID_ACTION);
+  // You declare UNO as you're about to go down to one card. Allowed with two
+  // cards in hand (the authentic "call it before you play your second-to-last
+  // card") - the call survives that play, so you can't then be caught - or with
+  // one card as a grace, before the opponent catches you.
+  const n = state.hands[seat].length;
+  if (n !== 1 && n !== 2) return reject(ErrorCode.INVALID_ACTION);
   state.calledUno[seat] = true;
   return { events: [] };
 }
@@ -260,7 +268,7 @@ function applyCatch(state: UnoState, catcherSeat: Seat): ActionResult {
   if (state.hands[target].length !== 1 || state.calledUno[target]) {
     return reject(ErrorCode.INVALID_ACTION);
   }
-  drawInto(state, target, 2); // penalty; also clears their (absent) UNO flag
+  drawInto(state, target, CATCH_PENALTY); // penalty; also clears their (absent) UNO flag
   return { events: [] };
 }
 
@@ -308,7 +316,7 @@ function playableIdsFor(state: UnoState, seat: Seat): string[] {
   if (state.pendingDraw > 0) {
     return hand.filter((c) => canStackOn(c, state.pendingDrawType!)).map((c) => c.id);
   }
-  // Before OR after drawing, every playable card in hand is a legal move — the
+  // Before OR after drawing, every playable card in hand is a legal move - the
   // drawn card doesn't restrict what else you may play this turn.
   return hand.filter((c) => isPlayable(c, state.activeColor, top)).map((c) => c.id);
 }
@@ -401,7 +409,7 @@ export function createUnoModule(
 
     sanitizeFor(state, playerId, ctx): UnoPublicView {
       const seat = ctx.seatOf(playerId);
-      // Defense-in-depth: a seatless viewer (shouldn't happen — every player in a
+      // Defense-in-depth: a seatless viewer (shouldn't happen - every player in a
       // room holds a seat) gets a fully redacted view rather than a real hand.
       // This guarantees no hand can ever leak even if a future code path calls
       // sanitizeFor for a non-seated identity.

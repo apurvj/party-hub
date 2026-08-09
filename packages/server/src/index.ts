@@ -4,8 +4,12 @@ import express from "express";
 import { Server } from "socket.io";
 import { z } from "zod";
 import {
+  DEFAULT_DICE_CONFIG,
+  DEFAULT_GUESS_WHO_CONFIG,
+  DEFAULT_MATCH_CONFIG,
   DEFAULT_UNO_CONFIG,
   DEFAULT_WORDLE_CONFIG,
+  DICE_CATEGORIES,
   ErrorCode,
   fail,
   isValidRoomCode,
@@ -49,10 +53,54 @@ const unoConfigSchema = z
   })
   .optional();
 
+const guessWhoConfigSchema = z
+  .object({
+    bestOf: z.number().int().min(1).max(9).optional(),
+  })
+  .optional();
+
+const matchConfigSchema = z
+  .object({
+    tiers: z.array(z.enum(["sweet", "flirty", "spicy", "wild"])).min(1).max(4).optional(),
+    deckSize: z.number().int().min(4).max(60).optional(),
+    allowMedia: z.boolean().optional(),
+  })
+  .optional();
+
+const diceConfigSchema = z
+  .object({
+    categories: z
+      .array(
+        z.enum([
+          "bdsm",
+          "anal",
+          "oral",
+          "improv",
+          "impact",
+          "edging",
+          "worship",
+          "exhibition",
+          "roleplay",
+          "dirtytalk",
+          "degradation",
+          "climax",
+        ]),
+      )
+      .min(1)
+      .max(DICE_CATEGORIES.length)
+      .optional(),
+    targetScore: z.number().int().min(3).max(30).optional(),
+    allowMedia: z.boolean().optional(),
+  })
+  .optional();
+
 const createRoomSchema = z.object({
-  gameId: z.enum(["wordle", "uno"]),
+  gameId: z.enum(["wordle", "uno", "guess-the-person", "match", "dice"]),
   wordle: wordleConfigSchema,
   uno: unoConfigSchema,
+  "guess-the-person": guessWhoConfigSchema,
+  match: matchConfigSchema,
+  dice: diceConfigSchema,
 });
 
 const joinRoomSchema = z.object({ code: z.string().min(1).max(12) });
@@ -70,7 +118,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
 });
 
 // The room engine emits to players by playerId. A single identity can hold more
-// than one live socket at once (e.g. the room opened in two browser tabs — they
+// than one live socket at once (e.g. the room opened in two browser tabs - they
 // share a localStorage playerId), so we track a SET of socket ids per player and
 // fan out to every one. This avoids the "last socket wins" bug (a second tab
 // silently orphaning the first) without kicking sockets and triggering a
@@ -128,7 +176,7 @@ setInterval(() => {
 io.on("connection", (socket) => {
   const auth = socket.handshake.auth as Partial<HandshakeAuth>;
   // Trim so a whitespace-only id (" ") can't masquerade as a real, distinct
-  // player — an empty/blank id is never a valid identity.
+  // player - an empty/blank id is never a valid identity.
   const playerId = typeof auth.playerId === "string" ? auth.playerId.trim() : "";
   const nickname = typeof auth.nickname === "string" ? auth.nickname : "";
 
@@ -147,7 +195,7 @@ io.on("connection", (socket) => {
     const code = normalizeRoomCode(auth.roomCode);
     // A brand-new player MUST name themselves first (mirrors the room:create /
     // room:join handlers). Without this, a shared-link visitor would be seated
-    // as the default "Player". A reconnect (already-seated playerId) is exempt —
+    // as the default "Player". A reconnect (already-seated playerId) is exempt -
     // their nickname is already on file, so we let them back in even if the
     // handshake nickname is momentarily blank.
     const isReconnect = rooms.hasPlayer(code, playerId);
@@ -175,6 +223,9 @@ io.on("connection", (socket) => {
     const room = rooms.createRoom(parsed.data.gameId, {
       wordle: { ...DEFAULT_WORDLE_CONFIG, ...parsed.data.wordle },
       uno: { ...DEFAULT_UNO_CONFIG, ...parsed.data.uno },
+      "guess-the-person": { ...DEFAULT_GUESS_WHO_CONFIG, ...parsed.data["guess-the-person"] },
+      match: { ...DEFAULT_MATCH_CONFIG, ...parsed.data.match },
+      dice: { ...DEFAULT_DICE_CONFIG, ...parsed.data.dice },
     });
     const res = rooms.join(room.code, playerId, nickname);
     if (!res.ok) return ack(fail(res.error));
@@ -200,7 +251,7 @@ io.on("connection", (socket) => {
 
   // No-payload events: the ack is the callback the client passed. Some clients
   // may deliver a stray leading arg, so pick the LAST function argument as the
-  // ack rather than assuming a fixed position — and never trust it's present.
+  // ack rather than assuming a fixed position - and never trust it's present.
   socket.on("room:sync", (...args: unknown[]) => {
     const ack = lastFn(args);
     if (!ack) return;

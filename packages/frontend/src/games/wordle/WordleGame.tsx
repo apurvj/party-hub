@@ -143,7 +143,7 @@ export function WordleGame({ room, game, lastEvent, onGuess, onNextRound, onHint
           {opponent ? (
             <PlayerBadge nickname={opponent.nickname} connected={opponent.connected} size="sm" />
           ) : (
-            <span className="text-xs text-ink-mute">—</span>
+            <span className="text-xs text-ink-mute">-</span>
           )}
         </div>
       </div>
@@ -166,7 +166,7 @@ export function WordleGame({ room, game, lastEvent, onGuess, onNextRound, onHint
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
             >
-              {canType ? "Your turn — type a guess" : "Waiting for your partner…"}
+              {canType ? "Your turn - type a guess" : "Waiting for your partner…"}
             </motion.div>
           )}
           <HintControl
@@ -214,7 +214,7 @@ export function WordleGame({ room, game, lastEvent, onGuess, onNextRound, onHint
 
 /**
  * The "last two guesses" hint control. Renders nothing until a hint is
- * available or has been used — so it never nags early. The server is the
+ * available or has been used - so it never nags early. The server is the
  * authority on `canHint`; this just reflects and requests.
  */
 function HintControl({
@@ -299,7 +299,7 @@ function RoundOverlay({
     title = iSolved ? "Solved together! 🎉" : "Out of guesses";
   } else {
     // Race: use the ROUND winner (matchWinnerSeat is null until the match ends).
-    if (iSolved) title = "Nice — you got it! 🎉";
+    if (iSolved) title = "Nice - you got it! 🎉";
     else if (roundWinner === mySeat) title = "You win the round!";
     else if (roundWinner && roundWinner !== "tie") title = `${opponentName} solved it first`;
     else title = "Nobody got it";
@@ -335,7 +335,7 @@ function RoundOverlay({
         </div>
         <h2 className="font-display text-2xl font-bold text-ink">{title}</h2>
 
-        {/* The answer is ALWAYS shown once the round is over — so whoever didn't
+        {/* The answer is ALWAYS shown once the round is over - so whoever didn't
             solve it (ran out of guesses, or got beaten to it) still learns it. */}
         {game.revealedAnswer && (
           <p className="mt-1 text-ink-soft">
@@ -354,7 +354,7 @@ function RoundOverlay({
           ) : waitingForOpponent ? (
             // Still an interactive button (not a dead spinner): re-clicking while
             // both are present is a harmless idempotent no-op, and it's the
-            // escape hatch if the opponent leaves — the server lets a lone
+            // escape hatch if the opponent leaves - the server lets a lone
             // occupant advance solo rather than waiting forever.
             <Button fullWidth size="lg" variant="secondary" onClick={() => void clickNext()}>
               <span
@@ -365,7 +365,7 @@ function RoundOverlay({
             </Button>
           ) : (
             <Button fullWidth size="lg" loading={readying} onClick={() => void clickNext()}>
-              {game.opponentReady ? `${opponentName} is ready — Next round →` : "I'm ready →"}
+              {game.opponentReady ? `${opponentName} is ready - Next round →` : "I'm ready →"}
             </Button>
           )}
         </div>

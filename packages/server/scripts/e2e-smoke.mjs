@@ -2,9 +2,9 @@
  * End-to-end smoke test over the real Socket.io protocol. Proves the user's
  * core requirements against a running server (default http://localhost:3001):
  *
- *   1. SAME WORD for both players — an identical guess yields identical feedback.
- *   2. ANTI-CHEAT — the answer is never present in a mid-round payload.
- *   3. REFRESH-SAFE — a reconnect (same playerId) replays guesses + feedback,
+ *   1. SAME WORD for both players - an identical guess yields identical feedback.
+ *   2. ANTI-CHEAT - the answer is never present in a mid-round payload.
+ *   3. REFRESH-SAFE - a reconnect (same playerId) replays guesses + feedback,
  *      and the word is unchanged (same feedback for the same guess).
  *   4. Both players see the SAME revealed answer once the round ends.
  *
@@ -19,7 +19,7 @@ let failures = 0;
 function check(label, cond, detail = "") {
   const mark = cond ? "✓" : "✗";
   if (!cond) failures++;
-  console.log(`  ${mark} ${label}${detail ? ` — ${detail}` : ""}`);
+  console.log(`  ${mark} ${label}${detail ? ` - ${detail}` : ""}`);
 }
 
 /** A thin client wrapper that always tracks the latest room:state snapshot. */
@@ -85,7 +85,7 @@ async function main() {
     await sleep(400);
     check("nickname-less auto-join is rejected", gateErr?.code === "NICKNAME_REQUIRED", JSON.stringify(gateErr));
     check("nickname-less visitor is NOT seated", noName.state === null);
-    // And A still sees only itself — the ghost never took a seat.
+    // And A still sees only itself - the ghost never took a seat.
     check("room still has just the creator", A.state?.players.length === 1, `players=${A.state?.players.length}`);
     noName.socket.disconnect();
   }
@@ -111,7 +111,7 @@ async function main() {
   await waitFor(B, (s) => s.game?.self.guesses.length >= 1, "B feedback recorded");
   const fbA = JSON.stringify(A.state.game.self.feedback[0]);
   const fbB = JSON.stringify(B.state.game.self.feedback[0]);
-  check("SAME WORD — identical guess yields identical feedback", fbA === fbB, `${fbA} vs ${fbB}`);
+  check("SAME WORD - identical guess yields identical feedback", fbA === fbB, `${fbA} vs ${fbB}`);
 
   // --- ANTI-CHEAT: answer not revealed mid-round ---
   check("A payload hides answer mid-round", A.state.game.revealedAnswer === null);
@@ -128,8 +128,8 @@ async function main() {
   await waitFor(A2, (s) => s.game?.self.guesses.length >= 1, "A2 replayed guesses");
   const replayedGuess = A2.state.game.self.guesses[0];
   const replayedFb = JSON.stringify(A2.state.game.self.feedback[0]);
-  check("REFRESH-SAFE — prior guess replayed", replayedGuess === probe, `got ${replayedGuess}`);
-  check("REFRESH-SAFE — same word after reconnect (feedback identical)", replayedFb === fbA);
+  check("REFRESH-SAFE - prior guess replayed", replayedGuess === probe, `got ${replayedGuess}`);
+  check("REFRESH-SAFE - same word after reconnect (feedback identical)", replayedFb === fbA);
 
   // --- Drive the round to completion → both see the SAME revealed answer ---
   const pool = ["SLATE", "MOUNT", "BRICK", "FLUID", "GHOST", "PLUMB", "WORDY", "JUMPY"];

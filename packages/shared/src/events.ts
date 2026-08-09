@@ -2,14 +2,17 @@ import type { AppError } from "./errors.js";
 import type { GameId, RoomStatePayload } from "./room.js";
 import type { WordleConfig } from "./games/wordle.js";
 import type { UnoConfig } from "./games/uno.js";
+import type { GuessWhoConfig } from "./games/guessWho.js";
+import type { MatchConfig } from "./games/match.js";
+import type { DiceConfig } from "./games/dice.js";
 
 /**
- * The socket event catalog — the single source of truth for the wire protocol.
+ * The socket event catalog - the single source of truth for the wire protocol.
  * Both server and client import these types so payloads can never drift.
  *
  * Convention: `namespace:verb`. One canonical action event (`game:action`)
  * carries every game-specific move, so adding Uno / Guess-the-Person needs no
- * new socket events — only a new action union inside the game module.
+ * new socket events - only a new action union inside the game module.
  */
 
 /** Sent in the Socket.io connection `auth` object on every (re)connect. */
@@ -26,6 +29,9 @@ export interface CreateRoomReq {
   gameId: GameId;
   wordle?: Partial<WordleConfig>;
   uno?: Partial<UnoConfig>;
+  "guess-the-person"?: Partial<GuessWhoConfig>;
+  match?: Partial<MatchConfig>;
+  dice?: Partial<DiceConfig>;
 }
 export interface CreateRoomRes {
   code: string;
@@ -77,7 +83,7 @@ export interface RoomNotice {
 }
 
 // NOTE: rejected moves (invalid word, wrong turn, wrong length, …) are NOT
-// broadcast as events — they're returned to the acting player via the
+// broadcast as events - they're returned to the acting player via the
 // `game:action` ack error envelope. `GameEvent` is reserved for moments BOTH
 // players should observe (a round/match ending, a new round starting).
 export type GameEvent =

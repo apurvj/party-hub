@@ -15,8 +15,8 @@ let socket: AppSocket | null = null;
  *
  * IMPORTANT: this does NOT touch `auth.roomCode`. Room membership is owned
  * solely by `getRoomSocket` (called from the room lifecycle). If this cleared
- * the room code, then every action sender that calls `getSocket()` — submitting
- * a guess, next round, rematch — would bounce the connection into a room-less
+ * the room code, then every action sender that calls `getSocket()` - submitting
+ * a guess, next round, rematch - would bounce the connection into a room-less
  * handshake and the server would report "you're not in this room".
  *
  * The server reads auth ONCE at handshake time, so when the identity materially
@@ -29,7 +29,7 @@ export function getSocket(): AppSocket {
     socket = io(SERVER_URL, {
       autoConnect: false,
       // Prefer a raw WebSocket (low latency), but fall back to HTTP long-polling
-      // when a network blocks the WS upgrade — common on mobile/carrier/corporate
+      // when a network blocks the WS upgrade - common on mobile/carrier/corporate
       // networks. `tryAllTransports` makes socket.io actually attempt the next
       // transport instead of giving up on the first failure. Safe here because we
       // run a SINGLE server instance (polling needs no sticky sessions).
@@ -47,7 +47,7 @@ export function getSocket(): AppSocket {
 }
 
 /**
- * Set the room the handshake should (re)join, WITHOUT connecting — the caller
+ * Set the room the handshake should (re)join, WITHOUT connecting - the caller
  * attaches its event listeners first, then drives the connection, so it can't
  * miss a `connect` fired by a bounce. Returns whether the room actually changed
  * (so the caller knows to re-handshake a live socket). This is the ONLY writer
@@ -67,7 +67,7 @@ const ACK_TIMEOUT_MS = 10_000;
 
 /**
  * Resolve once the socket is connected. Socket.io buffers `emit`s issued while
- * connecting and flushes them on connect — BUT only the *event* is buffered, not
+ * connecting and flushes them on connect - BUT only the *event* is buffered, not
  * an ack timeout, so an emit-with-ack fired before connect will hang forever if
  * the connection never lands. We gate every ack emit on this so a cold socket
  * (the very first click on a freshly-loaded page) can't spin indefinitely.
@@ -112,7 +112,7 @@ function whenConnected(sock: AppSocket): Promise<void> {
  *
  * When there's no request payload (e.g. `room:sync`, `room:rematch`), we must
  * NOT emit an explicit `undefined` arg: Socket.io would then deliver
- * `(undefined, callback)` and the server handler — typed `(ack) => …` — would
+ * `(undefined, callback)` and the server handler - typed `(ack) => …` - would
  * see `ack === undefined` and throw. Omitting the arg puts the ack callback in
  * the first position, matching the shared event contract.
  */
@@ -139,7 +139,7 @@ export async function emitAck<TReq, TRes>(
       window.clearTimeout(timer);
       resolve(res);
     };
-    // NB: call `emit` ON the socket — extracting it into a bare variable and
+    // NB: call `emit` ON the socket - extracting it into a bare variable and
     // calling that would invoke it with `this === undefined` (ES-module strict
     // mode), and socket.io's `emit` dereferences `this._opts`, throwing
     // synchronously. socket.io typing for dynamic event names is loose, so we
@@ -161,7 +161,7 @@ export async function emitAck<TReq, TRes>(
 /**
  * A failed `Result` envelope for transport-level failures (no connection / no
  * ack). Shaped to match the server's `Result<T>` so callers can treat it
- * uniformly — they only ever read `.ok` and `.error.message`.
+ * uniformly - they only ever read `.ok` and `.error.message`.
  */
 function networkError<TRes>(message: string): TRes {
   return { ok: false, error: { code: ErrorCode.NETWORK, message } } as TRes;

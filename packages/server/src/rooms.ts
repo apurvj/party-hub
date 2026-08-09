@@ -58,7 +58,7 @@ function makeNotice(
   const messages: Record<typeof kind, string> = {
     opponent_joined: "Your opponent joined!",
     opponent_left: "Your opponent left the room.",
-    opponent_disconnected: "Opponent disconnected — waiting for them to return…",
+    opponent_disconnected: "Opponent disconnected - waiting for them to return…",
     opponent_reconnected: "Opponent is back!",
   };
   return { kind, message: messages[kind] };
@@ -116,7 +116,7 @@ export class RoomManager {
   }
 
   /**
-   * The room roster — identical for every recipient except the `isYou` flag,
+   * The room roster - identical for every recipient except the `isYou` flag,
    * which we stamp per-viewer in `snapshotFor`. Built once per broadcast.
    */
   private rosterOf(room: Room): Omit<PlayerView, "isYou">[] {
@@ -157,12 +157,18 @@ export class RoomManager {
   }
 
   private roomConfig(room: Room): RoomConfig {
-    return { wordle: room.configs.wordle, uno: room.configs.uno };
+    return {
+      wordle: room.configs.wordle,
+      uno: room.configs.uno,
+      "guess-the-person": room.configs["guess-the-person"],
+      match: room.configs.match,
+      dice: room.configs.dice,
+    };
   }
 
   /** Push fresh state to every connected, seated player. */
   private broadcastState(room: Room): void {
-    const roster = this.rosterOf(room); // identical for all recipients — build once
+    const roster = this.rosterOf(room); // identical for all recipients - build once
     for (const p of room.players.values()) {
       if (p.connected) this.emitter.emitRoomState(p.playerId, this.snapshotFor(room, p.playerId, roster));
     }
@@ -258,6 +264,15 @@ export class RoomManager {
     // New player: need a free seat.
     if (this.countSeatedPlayers(room) >= 2) return { ok: false, error: makeError(ErrorCode.ROOM_FULL) };
 
+    // A live gameState here means a game was already underway and this newcomer
+    // is filling a seat the previous occupant vacated for good (grace lapsed).
+    // Continuing on the old state would hand the newcomer the departed player's
+    // game state - their Wordle guesses, or, for the adult games, the old body
+    // baked into that seat's deck and their private votes - AND skip the consent
+    // gate (a non-null yourSex). Start a clean match instead, so both players
+    // (re)consent and (re)declare from scratch against their new partner.
+    const takeover = room.gameState != null;
+
     const player: Player = {
       playerId,
       nickname: nickname.trim() || "Player",
@@ -268,7 +283,15 @@ export class RoomManager {
     };
     room.players.set(playerId, player);
     this.assignSeat(room, player);
-    this.maybeStartGame(room);
+    if (takeover) {
+      // Fresh epoch so the new pairing gets fresh deterministic content rather
+      // than replaying the departed player's deal.
+      room.matchEpoch += 1;
+      room.gameState = room.module.createInitialState(this.ctxFor(room));
+      room.phase = room.module.phaseOf(room.gameState);
+    } else {
+      this.maybeStartGame(room);
+    }
     this.touch(room);
 
     this.noticeOpponent(room, playerId, "opponent_joined");
@@ -315,7 +338,7 @@ export class RoomManager {
     // position (the UI only shows the button at game_over anyway).
     if (room.phase !== "game_over") return { ok: false, error: makeError(ErrorCode.GAME_NOT_ACTIVE) };
     // Advance the match epoch BEFORE rebuilding state so the new match seeds off
-    // a fresh value — otherwise "Play again" replays the identical word sequence.
+    // a fresh value - otherwise "Play again" replays the identical word sequence.
     room.matchEpoch += 1;
     room.gameState = room.module.createInitialState(this.ctxFor(room));
     room.phase = room.module.phaseOf(room.gameState);

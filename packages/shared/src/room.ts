@@ -1,9 +1,12 @@
 import type { WordleConfig, WordlePublicView } from "./games/wordle.js";
 import type { UnoConfig, UnoPublicView } from "./games/uno.js";
+import type { GuessWhoConfig, GuessWhoPublicView } from "./games/guessWho.js";
+import type { MatchConfig, MatchPublicView } from "./games/match.js";
+import type { DiceConfig, DicePublicView } from "./games/dice.js";
 
 export type Seat = "A" | "B";
 
-export type GameId = "wordle" | "uno"; // "guess-the-person" added later
+export type GameId = "wordle" | "uno" | "guess-the-person" | "match" | "dice";
 
 /** Room-level lifecycle. Both players transition together. */
 export type RoomPhase =
@@ -26,14 +29,22 @@ export interface PlayerView {
 export interface RoomConfig {
   wordle: WordleConfig;
   uno: UnoConfig;
+  "guess-the-person": GuessWhoConfig;
+  match: MatchConfig;
+  dice: DiceConfig;
 }
 
 /** Discriminated union of the per-game public view carried in RoomStatePayload. */
-export type GamePublicView = WordlePublicView | UnoPublicView;
+export type GamePublicView =
+  | WordlePublicView
+  | UnoPublicView
+  | GuessWhoPublicView
+  | MatchPublicView
+  | DicePublicView;
 
 /**
  * The single snapshot the server sends on join AND on reconnect. Everything the
- * client needs to render the room from scratch lives here — this is what makes
+ * client needs to render the room from scratch lives here - this is what makes
  * refresh / shared-URL resumption reliable.
  */
 export interface RoomStatePayload {

@@ -16,7 +16,7 @@ services:
     healthCheckPath: /health
     envVars:
       # pnpm 11.20 (pinned via package.json#packageManager) needs Node >= 22.13
-      # — it uses the node:sqlite builtin, absent in Node 20.
+      # - it uses the node:sqlite builtin, absent in Node 20.
       - key: NODE_VERSION
         value: "22.13.0"
       # pnpm 11 hard-errors when a dep build script is ignored, and every
