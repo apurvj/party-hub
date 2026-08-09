@@ -3,6 +3,7 @@ import {
   AnimatePresence,
   motion,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -117,11 +118,27 @@ export function MatchGame({
     prevMatchCount.current = game.matches.length;
   }, [game.matches, isVoting]);
 
+  // Guard the safeword against a panicked double-tap firing several parallel
+  // onSafeword() calls (duplicate error toasts / racing dispatches); one
+  // in-flight call is enough. A ref avoids a re-render and any stale-closure gap.
+  const safewording = useRef(false);
+  const triggerSafeword = useCallback(() => {
+    if (safewording.current) return;
+    safewording.current = true;
+    void onSafeword().then((r) => {
+      if (!r.ok) {
+        show(r.error.message, "warning");
+        if (mounted.current) safewording.current = false;
+      }
+      // On success the session ends and this view is swapped out; leave latched.
+    });
+  }, [onSafeword, show]);
+
   const safeword = (
     <div className="mt-6 text-center">
       <button
         type="button"
-        onClick={() => void onSafeword().then((r) => !r.ok && show(r.error.message, "warning"))}
+        onClick={triggerSafeword}
         className="text-xs font-medium text-ink-mute underline decoration-dotted underline-offset-4 transition-colors hover:text-danger"
       >
         Safeword - end the session for both of us
@@ -445,17 +462,34 @@ function DaresStage({
   const [busy, setBusy] = useState(false);
   const [exit, setExit] = useState<MatchDareOutcome | null>(null);
 
+  // Reset the per-dare action state whenever the server advances us to a new
+  // dare. DaresStage (unlike SwipeDeck) isn't remounted per card, so we can't
+  // lean on a key to clear busy/exit. Doing it during render - not in an effect -
+  // means the fresh card never paints a frame inheriting the previous card's
+  // fly-off exit animation.
+  const dareId = dare?.card.id ?? null;
+  const [lastDareId, setLastDareId] = useState(dareId);
+  if (dareId !== lastDareId) {
+    setLastDareId(dareId);
+    setBusy(false);
+    setExit(null);
+  }
+
   const commit = useCallback(
     async (outcome: MatchDareOutcome) => {
       if (busy) return;
       setBusy(true);
       setExit(outcome);
       const res = await onDareAdvance(outcome);
-      if (!res.ok) onError(res.error.message);
-      // On success the parent rerenders with the next dare (keyed below);
-      // reset either way so a rejected action re-enables the buttons.
-      setBusy(false);
-      setExit(null);
+      // Only reset on error (re-enable the buttons to retry). On success we keep
+      // the card flying off until the server advances us to the next dare, which
+      // clears this state via the render-time reset above - mirroring SwipeDeck,
+      // so a rapid double-tap can't fire a second advance or animate a stale card.
+      if (!res.ok) {
+        onError(res.error.message);
+        setBusy(false);
+        setExit(null);
+      }
     },
     [busy, onDareAdvance, onError],
   );
@@ -607,6 +641,15 @@ function WaitingForPartner({
 }
 
 function MatchFlash({ card, onClose }: { card: MatchCard; onClose: () => void }) {
+  const reduceMotion = useReducedMotion();
+  // Escape dismisses, same as the backdrop tap / "Keep going" button.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   return (
     <motion.div
       className="fixed inset-0 z-40 grid place-items-center bg-ink/50 p-4"
@@ -614,18 +657,25 @@ function MatchFlash({ card, onClose }: { card: MatchCard; onClose: () => void })
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="match-flash-title"
     >
       <motion.div
-        initial={{ scale: 0.7, y: 30, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.8, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 360, damping: 22 }}
+        // Skip the springy scale/slide entrance for reduced-motion users; a plain
+        // fade (inherited from the backdrop) is enough to announce the match.
+        initial={reduceMotion ? { opacity: 0 } : { scale: 0.7, y: 30, opacity: 0 }}
+        animate={reduceMotion ? { opacity: 1 } : { scale: 1, y: 0, opacity: 1 }}
+        exit={reduceMotion ? { opacity: 0 } : { scale: 0.8, opacity: 0 }}
+        transition={reduceMotion ? { duration: 0.15 } : { type: "spring", stiffness: 360, damping: 22 }}
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-xs rounded-3xl p-7 text-center text-white shadow-e5"
         style={{ background: TIER_GRADIENT[card.tier] }}
       >
         <div className="mb-2 text-4xl">💞</div>
-        <h2 className="font-display text-2xl font-black tracking-tight">It's a match!</h2>
+        <h2 id="match-flash-title" className="font-display text-2xl font-black tracking-tight">
+          It's a match!
+        </h2>
         <p className="mt-3 text-sm font-medium leading-snug text-white/95">{card.text}</p>
         <button
           type="button"
@@ -654,6 +704,15 @@ function RevealOverlay({
   const [readying, setReadying] = useState(false);
   const ended = game.sessionEnded;
   const waitingForOpponent = game.youReady && !game.opponentReady && !ended;
+  // A successful next_round/rematch swaps this overlay out from under us; guard
+  // the failure-path setState so it never fires on an unmounted component.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   // After a full play-out we have per-dare outcomes to recap; a safeword ends
   // things before that, so fall back to the plain matched list.
@@ -669,9 +728,22 @@ function RevealOverlay({
     const res = await onNextRound();
     if (!res.ok) {
       show(res.error.message, "warning");
-      setReadying(false);
+      if (mounted.current) setReadying(false);
     }
   }, [readying, onNextRound, show]);
+
+  // Mirror clickNext's loading + double-click guard for the safeword-ended
+  // "start a new session" rematch, which previously fired bare (a double-tap
+  // could dispatch two rematches).
+  const clickRematch = useCallback(async () => {
+    if (readying) return;
+    setReadying(true);
+    const res = await onRematch();
+    if (!res.ok) {
+      show(res.error.message, "warning");
+      if (mounted.current) setReadying(false);
+    }
+  }, [readying, onRematch, show]);
 
   return (
     <motion.div
@@ -680,6 +752,9 @@ function RevealOverlay({
       animate={{ opacity: 1, backdropFilter: "blur(4px)" }}
       exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
       transition={{ duration: 0.25, ease: "easeOut" }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="match-reveal-title"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -690,7 +765,7 @@ function RevealOverlay({
       >
         <div className="text-center">
           <div className="mb-2 text-4xl">{ended ? "🫶" : "💞"}</div>
-          <h2 className="font-display text-2xl font-bold text-ink">
+          <h2 id="match-reveal-title" className="font-display text-2xl font-bold text-ink">
             {ended ? "Session ended" : "That's a wrap 🔥"}
           </h2>
           <p className="mt-1 text-sm text-ink-soft">
@@ -737,7 +812,7 @@ function RevealOverlay({
 
         <div className="mt-6">
           {ended ? (
-            <Button fullWidth size="lg" onClick={() => void onRematch()}>
+            <Button fullWidth size="lg" loading={readying} onClick={() => void clickRematch()}>
               Start a new session
             </Button>
           ) : waitingForOpponent ? (

@@ -163,6 +163,7 @@ export class RoomManager {
       "guess-the-person": room.configs["guess-the-person"],
       match: room.configs.match,
       dice: room.configs.dice,
+      "connect-four": room.configs["connect-four"],
     };
   }
 

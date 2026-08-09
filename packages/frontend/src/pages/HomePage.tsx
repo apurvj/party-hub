@@ -24,6 +24,7 @@ const FAMILY_GAMES: GameOption[] = [
   { value: "wordle", label: "Wordle", blurb: "Guess the 5-letter word", icon: "🟩" },
   { value: "uno", label: "Uno", blurb: "Empty your hand first", icon: "🎴" },
   { value: "guess-the-person", label: "Guess the Person", blurb: "Ask, narrow, pinpoint them", icon: "🕵️" },
+  { value: "connect-four", label: "Connect Four", blurb: "Line up four to win", icon: "🔴" },
 ];
 
 /** Explicit, 18+ games - tucked behind a discreet, collapsed disclosure. */
@@ -108,11 +109,13 @@ export function HomePage() {
         ? { gameId: "uno", uno: { bestOf } }
         : gameId === "guess-the-person"
           ? { gameId: "guess-the-person", "guess-the-person": { bestOf } }
-          : gameId === "match"
-            ? { gameId: "match", match: { tiers, deckSize, allowMedia } }
-            : gameId === "dice"
-              ? { gameId: "dice", dice: { categories: diceCats, targetScore, allowMedia: diceMedia } }
-              : { gameId: "wordle", wordle: { mode, bestOf, difficulty: "normal" } };
+          : gameId === "connect-four"
+            ? { gameId: "connect-four", "connect-four": { bestOf } }
+            : gameId === "match"
+              ? { gameId: "match", match: { tiers, deckSize, allowMedia } }
+              : gameId === "dice"
+                ? { gameId: "dice", dice: { categories: diceCats, targetScore, allowMedia: diceMedia } }
+                : { gameId: "wordle", wordle: { mode, bestOf, difficulty: "normal" } };
     const res = await emitAck<CreateRoomReq, Result<CreateRoomRes>>(sock, "room:create", req);
     setBusy(null);
     if (res.ok) navigate(`/room/${res.data.code}`);

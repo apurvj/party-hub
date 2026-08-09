@@ -11,6 +11,7 @@ import { UnoGame } from "../games/uno/UnoGame.js";
 import { GuessWhoGame } from "../games/guessWho/GuessWhoGame.js";
 import { MatchGame } from "../games/match/MatchGame.js";
 import { DiceGame } from "../games/dice/DiceGame.js";
+import { ConnectFourGame } from "../games/connectFour/ConnectFourGame.js";
 import { getNickname, setNickname } from "../net/identity.js";
 import { useRoom } from "../net/useRoom.js";
 
@@ -54,6 +55,7 @@ export function RoomPage() {
     diceSpin,
     diceResolve,
     diceSafeword,
+    c4Drop,
   } = useRoom(valid && hasNickname ? code : undefined);
 
   // Joining is driven by the socket handshake: `useRoom(code)` connects with the
@@ -183,6 +185,15 @@ export function RoomPage() {
             onSpin={diceSpin}
             onResolve={diceResolve}
             onSafeword={diceSafeword}
+            onRematch={rematch}
+          />
+        ) : room.game && room.game.gameId === "connect-four" ? (
+          <ConnectFourGame
+            room={room}
+            game={room.game}
+            lastEvent={lastEvent}
+            onDrop={c4Drop}
+            onNextRound={nextRound}
             onRematch={rematch}
           />
         ) : (

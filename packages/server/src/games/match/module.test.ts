@@ -85,7 +85,7 @@ describe("Match - setup / bodies", () => {
     expect(state.deck.some((c) => c.requires === "female")).toBe(true);
   });
 
-  it("a mixed couple gets mixed + neutral cards, never single-body-only ones", () => {
+  it("a mixed couple gets only mixed cards, never single-body-only ones", () => {
     const { state } = setup({ deckSize: 60 }, ["female", "male"]);
     expect(state.deck.some((c) => c.requires === "female")).toBe(false);
     expect(state.deck.some((c) => c.requires === "male")).toBe(false);
@@ -215,6 +215,29 @@ describe("Match - PRIVACY INVARIANT (the whole point)", () => {
     expect(view.yourVotes).toEqual([]);
     expect(view.opponentVotedCount).toBe(0);
     expect(view.currentCard).toBeNull();
+  });
+
+  it("a seatless viewer's dare cursor tracks the dares stage, not a stale index", () => {
+    const { mod, ctx, state } = setup({ deckSize: 3 });
+    const seatless = { ...ctx, seatOf: () => null };
+
+    // Voting (pre-dares): no cursor for a spectator, same as a seated player.
+    expect(mod.sanitizeFor(state, "stranger", seatless).currentDareIndex).toBe(-1);
+    expect(mod.sanitizeFor(state, "stranger", seatless).currentDare).toBeNull();
+
+    // In the dares stage the spectator can follow the (mutually-consented) cursor.
+    voteAllMutual(mod, state, ctx);
+    expect(state.stage).toBe("dares");
+    expect(mod.sanitizeFor(state, "stranger", seatless).currentDareIndex).toBe(0);
+
+    // Past the last dare (summary): the cursor sits at dares.length internally, but
+    // the spectator must see -1 / null - not an index past the end - exactly like a
+    // seated player does.
+    playOutDares(mod, state, ctx);
+    expect(state.stage).toBe("summary");
+    const done = mod.sanitizeFor(state, "stranger", seatless);
+    expect(done.currentDareIndex).toBe(-1);
+    expect(done.currentDare).toBeNull();
   });
 
   it("never leaks a card's `requires` anatomy tag to the client", () => {

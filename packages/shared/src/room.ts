@@ -3,10 +3,17 @@ import type { UnoConfig, UnoPublicView } from "./games/uno.js";
 import type { GuessWhoConfig, GuessWhoPublicView } from "./games/guessWho.js";
 import type { MatchConfig, MatchPublicView } from "./games/match.js";
 import type { DiceConfig, DicePublicView } from "./games/dice.js";
+import type { ConnectFourConfig, ConnectFourPublicView } from "./games/connectFour.js";
 
 export type Seat = "A" | "B";
 
-export type GameId = "wordle" | "uno" | "guess-the-person" | "match" | "dice";
+export type GameId =
+  | "wordle"
+  | "uno"
+  | "guess-the-person"
+  | "match"
+  | "dice"
+  | "connect-four";
 
 /** Room-level lifecycle. Both players transition together. */
 export type RoomPhase =
@@ -32,6 +39,7 @@ export interface RoomConfig {
   "guess-the-person": GuessWhoConfig;
   match: MatchConfig;
   dice: DiceConfig;
+  "connect-four": ConnectFourConfig;
 }
 
 /** Discriminated union of the per-game public view carried in RoomStatePayload. */
@@ -40,7 +48,8 @@ export type GamePublicView =
   | UnoPublicView
   | GuessWhoPublicView
   | MatchPublicView
-  | DicePublicView;
+  | DicePublicView
+  | ConnectFourPublicView;
 
 /**
  * The single snapshot the server sends on join AND on reconnect. Everything the

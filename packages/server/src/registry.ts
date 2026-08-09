@@ -1,4 +1,5 @@
 import type {
+  ConnectFourConfig,
   DiceConfig,
   GameId,
   GameModule,
@@ -12,6 +13,7 @@ import { createUnoModule } from "./games/uno/module.js";
 import { createGuessWhoModule } from "./games/guessWho/module.js";
 import { createMatchModule } from "./games/match/module.js";
 import { createDiceModule } from "./games/dice/module.js";
+import { createConnectFourModule } from "./games/connectFour/module.js";
 
 /**
  * Game registry. To add a new game: implement a GameModule and add a factory
@@ -23,6 +25,7 @@ export interface GameConfigs {
   "guess-the-person": GuessWhoConfig;
   match: MatchConfig;
   dice: DiceConfig;
+  "connect-four": ConnectFourConfig;
 }
 
 // `any` here is deliberate: each module has its own S/A/V; the engine treats
@@ -42,6 +45,8 @@ export function createGameModule(gameId: GameId, configs: GameConfigs): AnyGameM
       return createMatchModule(configs.match);
     case "dice":
       return createDiceModule(configs.dice);
+    case "connect-four":
+      return createConnectFourModule(configs["connect-four"]);
     default: {
       const _exhaustive: never = gameId;
       throw new Error(`Unknown game: ${String(_exhaustive)}`);
@@ -49,4 +54,11 @@ export function createGameModule(gameId: GameId, configs: GameConfigs): AnyGameM
   }
 }
 
-export const ENABLED_GAMES: GameId[] = ["wordle", "uno", "guess-the-person", "match", "dice"];
+export const ENABLED_GAMES: GameId[] = [
+  "wordle",
+  "uno",
+  "guess-the-person",
+  "match",
+  "dice",
+  "connect-four",
+];

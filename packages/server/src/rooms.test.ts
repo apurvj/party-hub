@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  DEFAULT_CONNECT_FOUR_CONFIG,
   DEFAULT_DICE_CONFIG,
   DEFAULT_GUESS_WHO_CONFIG,
   DEFAULT_MATCH_CONFIG,
@@ -15,6 +16,7 @@ const CONFIGS: GameConfigs = {
   "guess-the-person": DEFAULT_GUESS_WHO_CONFIG,
   match: DEFAULT_MATCH_CONFIG,
   dice: DEFAULT_DICE_CONFIG,
+  "connect-four": DEFAULT_CONNECT_FOUR_CONFIG,
 };
 
 function silentEmitter(): RoomEmitter {

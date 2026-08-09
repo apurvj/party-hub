@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useState, type ReactNode } from "react";
 import type { Sex } from "@party-hub/shared";
 import { Button, PlayerBadge, cx } from "../../design-system/index.js";
@@ -73,6 +73,8 @@ export function AdultConsentGate({
   // Pre-fill from device memory so a returning player just taps the CTA.
   const [checked, setChecked] = useState(hasConsented);
   const [body, setBody] = useState<Sex | null>(rememberedBody);
+  // Skip the slide-up entrance for motion-sensitive users (a plain fade remains).
+  const reduceMotion = useReducedMotion();
 
   const ready = checked && body !== null && !busy;
 
@@ -85,8 +87,8 @@ export function AdultConsentGate({
   return (
     <div className="mx-auto max-w-md pt-10">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0, 0, 0.2, 1] }}
       >
         <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-e4">
@@ -223,11 +225,15 @@ export function AwaitingPartner({
   opponentConnected: boolean;
   youName: string;
 }) {
+  // Respect prefers-reduced-motion: skip the slide-up entrance AND the endless
+  // pulsing dots (a static "•••" is enough) - a looping animation would
+  // otherwise run indefinitely for a motion-sensitive user (WCAG 2.3.3).
+  const reduceMotion = useReducedMotion();
   return (
     <div className="mx-auto max-w-md pt-16">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0, 0, 0.2, 1] }}
         className="flex flex-col items-center rounded-3xl border border-border bg-surface p-8 text-center shadow-e4"
       >
@@ -247,8 +253,8 @@ export function AwaitingPartner({
           <PlayerBadge nickname={youName} you connected size="sm" />
           <motion.span
             className="text-ink-mute"
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 1.4, repeat: Infinity }}
+            animate={reduceMotion ? { opacity: 0.7 } : { opacity: [0.3, 1, 0.3] }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 1.4, repeat: Infinity }}
             aria-hidden
           >
             •••

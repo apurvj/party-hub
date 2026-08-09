@@ -72,9 +72,9 @@ export interface MatchCard {
   /**
    * Which bodies the couple needs for this act. Match filters the shared deck by
    * the COUPLE (see coupleCanPerform): "female" = both partners have a vulva,
-   * "male" = both have a penis, "mixed" = one of each. Omitted ⇒ anatomy-neutral
-   * (any couple can do it). Cards are written so the neutral ones dominate and
-   * the body-specific ones fill in the raw, explicit acts one body enables.
+   * "male" = both have a penis, "mixed" = one of each. Omitted ⇒ anatomy-neutral,
+   * but the shipping deck sets it on EVERY card - each is raw and body-specific,
+   * so a couple only ever sees acts their two declared bodies can perform.
    */
   requires?: BodyReq;
 }
@@ -202,103 +202,95 @@ export interface MatchPublicView {
 
 /**
  * THE CONTENT DECK - a shared DESIRE MENU. Every card is written in the FIRST
- * PERSON PLURAL ("I want us to…", "Let's…", "Show me how you'd…") because Match
+ * PERSON PLURAL ("I want him…", "Let's have her…", "I want us to…") because Match
  * is about finding what you BOTH want to do together - the mutual "yes" pile
- * becomes the night's playlist. This voice, and the focus on ACTS & POSITIONS
- * (much of it drawn from the Kamasutra / Ananga Ranga tradition), is what keeps
- * Match distinct from Dice's snapped-out one-line commands.
+ * becomes the night's playlist. This shared "we/us" voice is what keeps Match
+ * distinct from Dice's snapped-out one-line commands.
  *
- * Tiered by intensity; `wild` is opt-in rough/kink. Toys are deliberately RARE
- * and every toy card names a hands/household alternative, so nobody needs gear.
- * Media-flagged cards are excluded when a couple turns media off. Keep ids STABLE
- * (used as deterministic deck keys).
+ * Tiered by intensity; `wild` is opt-in rough/kink. Media-flagged cards are
+ * excluded when a couple turns media off. Keep ids STABLE (deterministic keys).
  *
- * ANATOMY: most cards are body-neutral ("stroke / rub yourself", "where it
- * counts") and play for any couple. The `requires`-tagged blocks at the end are
- * the explicit, body-specific acts (two vulvas / two cocks / one of each) and are
- * only dealt to a couple whose two declared bodies can actually do them - see
- * matchPool + coupleCanPerform. That's what lets a couple go raw and specific
- * without ever handing someone an act their body can't perform.
+ * ANATOMY: EVERY card is body-specific, raw and explicit - each one names the
+ * exact parts (clit / pussy / folds / nipples for a vulva; cock / dick / balls /
+ * shaft / head for a penis) and the exact act. There are no body-neutral cards.
+ * The deck is split into three `requires` blocks - MIXED (one of each body, and
+ * every card spells out what HE does with his cock and what SHE does with her
+ * pussy), FEMALE (two vulvas), and MALE (two cocks) - and matchPool +
+ * coupleCanPerform deal a couple only the block their two declared bodies can
+ * actually do. Each block covers all four tiers, so any tier selection is
+ * playable for any couple. That's what lets a couple go raw and specific without
+ * ever handing them an act their bodies can't perform.
  */
 export const MATCH_CARDS: MatchCard[] = [
-  // ---- SWEET - slow, sensual, building heat --------------------------------
-  { id: "m-sw-01", tier: "sweet", category: "romance", text: "I want us to undress each other slowly on camera, one piece at a time, no rushing." },
-  { id: "m-sw-02", tier: "sweet", category: "foreplay", text: "Let's trace our own necks, collarbones and inner thighs in sync - wherever we wish the other's mouth was." },
-  { id: "m-sw-03", tier: "sweet", category: "tempo", text: "I want us to kiss the air like we're kissing each other - deep and slow - for one full minute." },
-  { id: "m-sw-04", tier: "sweet", category: "foreplay", text: "Let's give ourselves a slow oil massage on camera, hands drifting lower each pass." },
-  { id: "m-sw-05", tier: "sweet", category: "romance", text: "I want us to lie back, look into the camera, and say the filthiest thing we've ever wanted from each other." },
-  { id: "m-sw-06", tier: "sweet", category: "foreplay", text: "Let's run an ice cube slowly over our lips, throat and chest while the other watches." },
-  { id: "m-sw-07", tier: "sweet", category: "tempo", text: "I want us to touch ourselves over our underwear only - no skin yet - until one of us begs to go further." },
-  { id: "m-sw-08", tier: "sweet", category: "romance", text: "Let's take turns naming one thing we'd do to each other the second we're finally in the same bed." },
-  { id: "m-sw-09", tier: "sweet", category: "messages", text: "I want us to send a voice note breathing out exactly what we're aching for right now.", media: true },
-  { id: "m-sw-10", tier: "sweet", category: "foreplay", text: "Let's suck on two fingers, slow, showing each other exactly how we'd use our mouths." },
+  // ---- BODY-SPECIFIC: one of each (a MIXED couple) --------------------------
+  // Only dealt when the two bodies differ. Every card names what HE does with his
+  // cock/balls and what SHE does with her clit/pussy, played off each other.
+  { id: "m-sweet-01", tier: "sweet", category: "romance", requires: "mixed", text: "I want him stroking his dick slow and steady while she rubs her clit in easy circles - matched pace, eyes locked, like we're touching each other through the camera." },
+  { id: "m-sweet-02", tier: "sweet", category: "foreplay", requires: "mixed", text: "Let's have him squeeze his shaft gently while she strokes her pussy lips slow - both taking our time, no rush, building that feeling together from across the distance." },
+  { id: "m-sweet-03", tier: "sweet", category: "messages", requires: "mixed", text: "I want to watch you stroke your cock while reading what I'm typing about touching my clit for you - words and strokes in sync, slow and sensual." },
+  { id: "m-sweet-04", tier: "sweet", category: "oral", requires: "mixed", text: "I want him stroking his cock slow while he sucks his own fingers like he's tasting her pussy, and her rubbing her clit while she sucks her fingers like they're his cock - both of us going down on each other in our heads, slow and sweet." },
+  { id: "m-sweet-05", tier: "sweet", category: "positions", requires: "mixed", text: "I want him stroking his dick in long strokes while she spreads her pussy and plays with her folds - both of us stretched out naked, mirroring each other." },
+  { id: "m-sweet-06", tier: "sweet", category: "tempo", requires: "mixed", text: "Let's have him match her rhythm - she rubs slow circles on her clit while he jerks his cock at that same peaceful pace, breathing together." },
+  { id: "m-sweet-07", tier: "sweet", category: "roleplay", requires: "mixed", text: "I want him pretending he's inside you while stroking his cock slow, and you rubbing your clit like he's really there - roleplay the intimacy we're missing." },
+  { id: "m-flirty-01", tier: "flirty", category: "romance", requires: "mixed", text: "I want him teasing his balls while you tease your clit - light touches, building tension, both of us watching for the moment we lose control together." },
+  { id: "m-flirty-02", tier: "flirty", category: "foreplay", requires: "mixed", text: "Let's have him stroking his shaft hard and fast while she fingers her pussy faster too - matching energy, both getting more desperate, proving we want each other." },
+  { id: "m-flirty-03", tier: "flirty", category: "toys", requires: "mixed", text: "I want to watch him stroke his cock while I'm using a toy on my clit - both of us playing with our favorite tools, racing to see who cums first." },
+  { id: "m-flirty-04", tier: "flirty", category: "messages", requires: "mixed", media: true, text: "Send me a video of you jerking your cock while I film myself rubbing my clit - we'll watch each other's pleasure, tease about what we see." },
+  { id: "m-flirty-05", tier: "flirty", category: "tempo", requires: "mixed", text: "I want him alternating slow and fast strokes on his dick while she does the same to her clit - keep me guessing, keep that heat building." },
+  { id: "m-flirty-06", tier: "flirty", category: "oral", requires: "mixed", text: "Let's have him suck two fingers deep and moan like it's your pussy on his tongue while he strokes his cock, and you suck your fingers and moan like they're his cock while you rub your clit - filthy sounds traded back and forth." },
+  { id: "m-flirty-07", tier: "flirty", category: "positions", requires: "mixed", text: "I want him on his back stroking his cock while you're on your back spreading your pussy wider - both of us spread open, completely exposed to each other." },
+  { id: "m-spicy-01", tier: "spicy", category: "foreplay", requires: "mixed", text: "I want him rubbing his cock head between his balls and shaft fast and hard, and you rubbing your pussy hard while pushing fingers deep inside - both of us chasing it." },
+  { id: "m-spicy-02", tier: "spicy", category: "oral", requires: "mixed", text: "Let's have him fuck his fist hard around his shaft while you ride your own fingers deep in your pussy - match each other's aggression, don't hold back." },
+  { id: "m-spicy-03", tier: "spicy", category: "positions", requires: "mixed", text: "I want him on his knees jerking his cock hard while you're in the same position rubbing your pussy faster - both of us fucking our own hands like they're each other." },
+  { id: "m-spicy-04", tier: "spicy", category: "tempo", requires: "mixed", text: "I want him stroking his dick slow at first, building faster and faster, while you do the same to your clit - let's race to the edge and jump together." },
+  { id: "m-spicy-05", tier: "spicy", category: "toys", requires: "mixed", text: "Let's have him stroking his cock while you ride a dildo in your pussy hard and fast - both of us fucking, both of us loud, both of us close to losing it." },
+  { id: "m-spicy-06", tier: "spicy", category: "roleplay", requires: "mixed", text: "I want to watch him jerk his cock like he's fucking you hard, and you rub your clit like you're actually taking him - make me believe you want me that badly." },
+  { id: "m-spicy-07", tier: "spicy", category: "messages", requires: "mixed", media: true, text: "I want you stroking your cock to audio of me moaning while fingering my pussy - we'll trade recordings, both getting off to each other's sounds." },
+  { id: "m-wild-01", tier: "wild", category: "positions", requires: "mixed", text: "I want him on his back, balls drawn tight, stroking his cock hard while you squat and rub your pussy - both of us wide open, grinding against the camera." },
+  { id: "m-wild-02", tier: "wild", category: "tempo", requires: "mixed", text: "Let's have him jerk his cock in quick rough strokes while you rub your clit hard and fast - both of us panting, both of us desperate, both of us coming hard." },
+  { id: "m-wild-03", tier: "wild", category: "toys", requires: "mixed", text: "I want him fucking his hand hard around his shaft while you rub a vibrator hard on your clit at full speed - both of us getting wrecked, making ourselves cum loud." },
+  { id: "m-wild-04", tier: "wild", category: "roleplay", requires: "mixed", text: "I want him talking dirty about what he'd do to your pussy while stroking his cock, and you pushing your fingers deep in your pussy while listening to every word he says." },
+  { id: "m-wild-05", tier: "wild", category: "oral", requires: "mixed", text: "Let's have him deep-throat a cucumber, gagging on it like it's a cock while he strokes himself, and you finger your pussy and rub your clit - both of us filthy, both of us taking it hard." },
+  { id: "m-wild-06", tier: "wild", category: "foreplay", requires: "mixed", text: "I want him pulling his cock hard and rough, twisting at the tip, while you're fucking your pussy deep with your fingers, both of us violent and desperate." },
+  { id: "m-wild-07", tier: "wild", category: "messages", requires: "mixed", media: true, text: "I want you to describe exactly how you're stroking your cock while I describe exactly how I'm fingering my pussy - raw voice notes, no censoring, just pure filth." },
 
-  // ---- FLIRTY - hands-on, teasing, foreplay proper -------------------------
-  { id: "m-fl-01", tier: "flirty", category: "foreplay", text: "I want us to strip fully naked on the call and just look, hands behind our backs, until we can't stand it." },
-  { id: "m-fl-02", tier: "flirty", category: "tempo", text: "Let's touch ourselves at the exact same slow pace - one of us calls faster / slower / stop." },
-  { id: "m-fl-03", tier: "flirty", category: "oral", text: "I want us to show each other, on our fingers, precisely how we'd lick, suck and swirl our tongue over the other." },
-  { id: "m-fl-04", tier: "flirty", category: "positions", text: "Let's get on all fours facing away, look back over our shoulder, and show how we'd want to be taken like this." },
-  { id: "m-fl-05", tier: "flirty", category: "foreplay", text: "I want us to spit in our palm and stroke / rub ourselves slow while holding eye contact." },
-  { id: "m-fl-06", tier: "flirty", category: "messages", text: "Let's each send one filthy photo, framed exactly how the other asks for it.", media: true },
-  { id: "m-fl-07", tier: "flirty", category: "positions", text: "I want us to lie back and pull our knees to our chest, fully open to the camera, and hold it there." },
-  { id: "m-fl-08", tier: "flirty", category: "tempo", text: "Let's edge together: right to the brink, then hands off and show each other our desperate faces." },
-  { id: "m-fl-09", tier: "flirty", category: "roleplay", text: "I want us to play it like we snuck away mid-party - quiet, quick, can't-get-caught energy." },
-  { id: "m-fl-10", tier: "flirty", category: "oral", text: "Let's grind against a pillow between our legs like it's the other, and let them hear it." },
-  { id: "m-fl-11", tier: "flirty", category: "foreplay", text: "I want us to give running dirty commentary out loud on every single thing we're doing to ourselves." },
-  { id: "m-fl-12", tier: "flirty", category: "messages", text: "Let's each record a ten-second clip finishing 'When I get you alone I'm going to…'", media: true },
+  // ---- BODY-SPECIFIC: two vulvas (both partners FEMALE-bodied) --------------
+  // Only dealt when BOTH declared "female" - explicit clit/pussy/nipple acts.
+  { id: "m-f-01", tier: "sweet", category: "romance", requires: "female", text: "I want us to lie facing each other, touching our own clits while looking into each other's eyes the whole time." },
+  { id: "m-f-02", tier: "sweet", category: "foreplay", requires: "female", text: "Let's trace our own nipples slowly, describing to each other how it feels, and see how turned on we can get just from talking." },
+  { id: "m-f-03", tier: "sweet", category: "messages", requires: "female", media: true, text: "Send me a voice note whispering exactly what you want to do to my pussy - I want to hear your breathing get heavier." },
+  { id: "m-f-04", tier: "sweet", category: "tempo", requires: "female", text: "Let's touch our own pussies at exactly the same pace - start slow, count aloud to stay in sync, build together." },
+  { id: "m-f-05", tier: "flirty", category: "foreplay", requires: "female", text: "I want us to watch each other slip our hands into our pants and rub our clits through the fabric first - just teasing ourselves." },
+  { id: "m-f-06", tier: "flirty", category: "oral", requires: "female", text: "Let's both get a toy shaped like a tongue and trace our own nipples and pussies with it while narrating what we'd do to each other." },
+  { id: "m-f-07", tier: "flirty", category: "tempo", requires: "female", text: "Rub your clit in figure-eights, slow at first, then faster and faster - I'll do the same and we'll race to who cums first." },
+  { id: "m-f-08", tier: "flirty", category: "roleplay", requires: "female", text: "Pretend we both just got home and desperate - narrate what you want me to do to your pussy while we rub our own clits and tease each other." },
+  { id: "m-f-09", tier: "spicy", category: "positions", requires: "female", text: "Sit facing me and spread your pussy open with your fingers so I can see everything - I'll do the same and we'll both rub our clits." },
+  { id: "m-f-10", tier: "spicy", category: "toys", requires: "female", text: "Let's each use a vibrator - you on your clit, me on mine - and trade off controlling each other's speed on a shared timer." },
+  { id: "m-f-11", tier: "spicy", category: "foreplay", requires: "female", text: "I want to watch you fuck your pussy with a dildo while you play with your nipples - then I'll grab my own and use it exactly the way you just showed me while you watch." },
+  { id: "m-f-12", tier: "spicy", category: "oral", requires: "female", text: "Let's pretend we're eating each other out - describe every lick on our clits and pussies while we finger ourselves exactly as you describe." },
+  { id: "m-f-13", tier: "wild", category: "tempo", requires: "female", text: "Fuck yourself hard with your fingers on your pussy while rubbing your clit fast - I'll match your rhythm and we'll both cum hard together." },
+  { id: "m-f-14", tier: "wild", category: "toys", requires: "female", text: "Use a vibrator on your clit to edge yourself three times before cumming - describe every denial to me while I do the same, and we cum on your count." },
+  { id: "m-f-15", tier: "wild", category: "roleplay", requires: "female", text: "Take turns being in control - one tells the other exactly how fast to rub our clits and pussy, then we switch who decides." },
+  { id: "m-f-16", tier: "wild", category: "positions", requires: "female", text: "Get on your knees, arch your back, and fuck your pussy with a dildo while I watch you rub your clit and pinch your nipples hard." },
 
-  // ---- SPICY - explicit acts & Kamasutra positions -------------------------
-  { id: "m-sp-01", tier: "spicy", category: "oral", text: "I want us to go down on each other in a filthy mimed 69 - both of us working, moaning into it." },
-  { id: "m-sp-02", tier: "spicy", category: "positions", text: "Let's act out cowgirl: one rides an upright pillow / hand, the other lies back and watches every bounce." },
-  { id: "m-sp-03", tier: "spicy", category: "positions", text: "I want us to do the Kamasutra 'lotus' - seated, wrapped around each other - and grind in that clinch." },
-  { id: "m-sp-04", tier: "spicy", category: "tempo", text: "Let's finish together on a shared countdown from ten, no stopping, eyes locked." },
-  { id: "m-sp-05", tier: "spicy", category: "positions", text: "I want us to do doggy against the headboard - on our knees, back arched, thrusting into our own hand." },
-  { id: "m-sp-06", tier: "spicy", category: "oral", text: "Let's take a cucumber / two fingers all the way and show each other exactly how deep we can go." },
-  { id: "m-sp-07", tier: "spicy", category: "positions", text: "I want us to try the 'Ananga Ranga' rider - lie flat, one straddles high on the hips and rolls slow." },
-  { id: "m-sp-08", tier: "spicy", category: "tempo", text: "Let's race - first one over the edge while watching the other wins, and has to say so out loud." },
-  { id: "m-sp-09", tier: "spicy", category: "toys", text: "I want us to use whatever's within reach - a toy, a hairbrush handle, or just fingers - and narrate every second." },
-  { id: "m-sp-10", tier: "spicy", category: "positions", text: "Let's do the 'splitting bamboo' - one leg up on our shoulder - and show how deep that angle would let us go." },
-  { id: "m-sp-11", tier: "spicy", category: "messages", text: "I want us to trade a full-length nude video moving exactly how the other tells us to.", media: true },
-  { id: "m-sp-12", tier: "spicy", category: "oral", text: "Let's sit back, spread, and touch ourselves right where we'd guide the other's tongue - slow circles." },
-  { id: "m-sp-13", tier: "spicy", category: "positions", text: "I want us to mime spooning sex: on our side, one behind, hips rolling in that lazy deep rhythm." },
-  { id: "m-sp-14", tier: "spicy", category: "tempo", text: "Let's do stop-and-start five times - full stop the instant the other says 'stop', hold, then go again." },
-
-  // ---- WILD - rough, kink, power, degradation ------------------------------
-  { id: "m-wl-01", tier: "wild", category: "roleplay", text: "I want us to pick dom and sub for the next ten minutes - the sub does nothing without permission." },
-  { id: "m-wl-02", tier: "wild", category: "positions", text: "Let's do 'the press' rough - knees pinned to chest, pounding into our own hand hard and fast on command." },
-  { id: "m-wl-03", tier: "wild", category: "roleplay", text: "I want us to spank ourselves where the other points and count each one out loud - they say when to stop." },
-  { id: "m-wl-04", tier: "wild", category: "roleplay", text: "Let's each put a belt or scarf around our own throat as a collar and answer to Sir / Miss all round." },
-  { id: "m-wl-05", tier: "wild", category: "tempo", text: "I want the dom to run the other's orgasm entirely - allowed only on their word, denied as long as they like." },
-  { id: "m-wl-06", tier: "wild", category: "positions", text: "Let's do face-down, ass-up, and rut into the mattress hard while the other calls the pace." },
-  { id: "m-wl-07", tier: "wild", category: "roleplay", text: "I want us to tie our own wrists with a soft scarf and be talked through being used, completely helpless." },
-  { id: "m-wl-08", tier: "wild", category: "roleplay", text: "Let's leave a mark - a bite or a hard pinch where the other chooses - and show the camera the proof." },
-  { id: "m-wl-09", tier: "wild", category: "roleplay", text: "I want us to beg, out loud and shameless, for exactly what we want done to us - no dignity left." },
-  { id: "m-wl-10", tier: "wild", category: "positions", text: "Let's mime standing-carry sex against the wall - pinned, legs up, taken hard and fast." },
-  { id: "m-wl-11", tier: "wild", category: "toys", text: "I want us to work a toy (or a cucumber / thick handle) while the other dictates depth, speed and 'don't you dare stop'." },
-  { id: "m-wl-12", tier: "wild", category: "roleplay", text: "Let's play strangers who couldn't wait - filthy, no names, pure use, both fully in character." },
-
-  // ---- BODY-SPECIFIC: two vulvas (both partners female-bodied) --------------
-  // Only dealt when BOTH partners declared "female" - explicit clit/pussy acts.
-  { id: "m-bf-01", tier: "flirty", category: "foreplay", requires: "female", text: "I want us to roll our own nipples and tease slow circles just around our clits - never quite on it - until we're begging." },
-  { id: "m-bf-02", tier: "spicy", category: "tempo", requires: "female", text: "Let's rub our clits in exact sync - slow, then fast on a shared count - and see who soaks through first." },
-  { id: "m-bf-03", tier: "spicy", category: "oral", requires: "female", text: "I want us to push two fingers deep, drag them out slow, and show each other on camera how wet we are." },
-  { id: "m-bf-04", tier: "spicy", category: "positions", requires: "female", text: "Let's fuck ourselves with two fingers curled to the front wall and grind the heel of our hand on our clit." },
-  { id: "m-bf-05", tier: "wild", category: "roleplay", requires: "female", text: "I want us to lightly slap our own clit then rub it hard - the other calls 'sting', then 'soothe', over and over." },
-
-  // ---- BODY-SPECIFIC: two cocks (both partners male-bodied) ------------------
-  // Only dealt when BOTH partners declared "male" - explicit cock/balls acts.
-  { id: "m-bm-01", tier: "flirty", category: "foreplay", requires: "male", text: "I want us to spit in our palms and stroke slow, thumbs working the head, edging right to the leak and backing off." },
-  { id: "m-bm-02", tier: "spicy", category: "tempo", requires: "male", text: "Let's fist our cocks matched stroke for stroke - same rhythm - until one of us has to slow the other down." },
-  { id: "m-bm-03", tier: "spicy", category: "foreplay", requires: "male", text: "I want us to tug our balls and stroke at the same time, narrating out loud exactly how close we are." },
-  { id: "m-bm-04", tier: "wild", category: "positions", requires: "male", text: "Let's grip the base tight like a cock ring and stroke hard and fast - the other counts down to when we're allowed to finish." },
-  { id: "m-bm-05", tier: "wild", category: "roleplay", requires: "male", text: "I want us to jerk it rough to the other's filthy commentary - faster, slower, don't you dare come yet." },
-
-  // ---- BODY-SPECIFIC: one of each (a mixed couple) --------------------------
-  // Only dealt when the two bodies differ - acts that play the two parts off each other.
-  { id: "m-bx-01", tier: "spicy", category: "tempo", requires: "mixed", text: "I want the one with the cock to stroke while the one with the pussy rides two fingers - matched pace, finish together." },
-  { id: "m-bx-02", tier: "spicy", category: "positions", requires: "mixed", text: "Let's mime it from behind - she grinds back on her hand while he fucks his fist at the pace she calls." },
-  { id: "m-bx-03", tier: "wild", category: "roleplay", requires: "mixed", text: "I want her to ride his face in mime while he strokes - she says the word before he's allowed to move his hand." },
-  { id: "m-bx-04", tier: "flirty", category: "oral", requires: "mixed", text: "Let's do a countdown 69 - each working ourselves exactly how we'd work the other's parts, moaning into it." },
+  // ---- BODY-SPECIFIC: two cocks (both partners MALE-bodied) ------------------
+  // Only dealt when BOTH declared "male" - explicit cock/balls/shaft acts.
+  { id: "m-m-01", tier: "sweet", category: "romance", requires: "male", text: "I want us to strip slowly for each other on camera, touching our own chests and thighs, building anticipation before we even stroke our cocks." },
+  { id: "m-m-02", tier: "sweet", category: "foreplay", requires: "male", text: "Let's kiss our own forearms and work our hands down to stroke our dicks slowly, making eye contact, showing each other every touch." },
+  { id: "m-m-03", tier: "sweet", category: "messages", requires: "male", media: true, text: "Send me a voice note describing exactly what you want to do to my cock, then play it back while you stroke your cock slow and deep." },
+  { id: "m-m-04", tier: "sweet", category: "tempo", requires: "male", text: "Let's masturbate together, matching each other's rhythm - slow and steady strokes on our shafts, breathing together." },
+  { id: "m-m-05", tier: "flirty", category: "foreplay", requires: "male", text: "I want us to get our cocks hard, then use just our thumbs on the heads, teasing each other over video for five minutes without stroking." },
+  { id: "m-m-06", tier: "flirty", category: "foreplay", requires: "male", text: "Let's lick our lips while stroking our cocks, tracing our fingers around the heads, making it obvious how turned on we are." },
+  { id: "m-m-07", tier: "flirty", category: "roleplay", requires: "male", text: "Pretend you're watching me stroke my cock and you can't touch your dick - describe what you'd do if you could, then we both stroke our cocks faster." },
+  { id: "m-m-08", tier: "flirty", category: "tempo", requires: "male", text: "Let's stroke our cocks fast then slow, alternating on command - you count to ten and we switch pace, building tension." },
+  { id: "m-m-09", tier: "spicy", category: "positions", requires: "male", text: "I want us both on our knees facing the camera, stroking our hard cocks in sync, gripping the base and working the head the same way at the same time like we're jerking each other off." },
+  { id: "m-m-10", tier: "spicy", category: "oral", requires: "male", text: "Let's both deep-throat a cucumber or a thick handle like it's the other's cock - gag on it, drool, stroke our own cocks while we do it, showing each other what we love." },
+  { id: "m-m-11", tier: "spicy", category: "tempo", requires: "male", text: "Stroke your cock hard and fast to match my pace exactly - no mercy, building to the edge together, stopping just before we come." },
+  { id: "m-m-12", tier: "spicy", category: "toys", requires: "male", text: "Use a toy on your cock - fuck it with your dick while I watch and stroke my cock, then describe how it feels and make me cum with words." },
+  { id: "m-m-13", tier: "wild", category: "roleplay", requires: "male", text: "Tell me I'm not allowed to cum until you give permission - stroke your cock while you watch me edge, teasing and denying." },
+  { id: "m-m-14", tier: "wild", category: "oral", requires: "male", text: "Let's both fuck our own mouths with a cucumber or dildo, gagging on it like it's the other's cock, jerking our cocks with the other hand till we come as hard as we can - raw, loud, no holding back." },
+  { id: "m-m-15", tier: "wild", category: "tempo", requires: "male", text: "I want us to fist our cocks matched stroke for stroke, thumbs working the heads hard, rough and fast until one of us has to stop." },
+  { id: "m-m-16", tier: "wild", category: "roleplay", requires: "male", text: "Demand I stroke my cock faster for you - use a commanding voice while you grip your shaft and pump hard, dominating me with your pleasure." },
 ];
 
 /**

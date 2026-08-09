@@ -59,6 +59,23 @@ export function DiceGame({ room, game, onSetSex, onSpin, onResolve, onSafeword, 
 
   const over = game.stage === "over" || game.sessionEnded;
 
+  // The safeword ends the set for both. Guard against a panicked double-tap
+  // firing several parallel onSafeword() calls (duplicate error toasts / racing
+  // dispatches); one in-flight call is enough. The ref (not state) means no
+  // re-render and no chance of a stale-closure gap between taps.
+  const safewording = useRef(false);
+  const triggerSafeword = useCallback(() => {
+    if (safewording.current) return;
+    safewording.current = true;
+    void onSafeword().then((r) => {
+      if (!r.ok) {
+        show(r.error.message, "warning");
+        if (mounted.current) safewording.current = false;
+      }
+      // On success the set ends and this view is swapped out; leave it latched.
+    });
+  }, [onSafeword, show]);
+
   // Fire a celebration when a winner is crowned (not on safeword).
   const celebrated = useRef(false);
   useEffect(() => {
@@ -170,7 +187,7 @@ export function DiceGame({ room, game, onSetSex, onSpin, onResolve, onSafeword, 
       <div className="mt-6 text-center">
         <button
           type="button"
-          onClick={() => void onSafeword().then((r) => !r.ok && show(r.error.message, "warning"))}
+          onClick={triggerSafeword}
           className="text-xs font-medium text-ink-mute underline decoration-dotted underline-offset-4 transition-colors hover:text-danger"
         >
           Safeword - end the set for both of us
@@ -410,11 +427,33 @@ function GameOverOverlay({
   yourSeat: DiceSeat | null;
   onRematch: () => Promise<Result<null>>;
 }) {
+  const { show } = useToast();
   const ended = game.sessionEnded;
   const youWon = !ended && yourSeat !== null && game.winnerSeat === yourSeat;
   const winnerName = game.winnerSeat === yourSeat ? youName : opponentName;
 
   const doneCount = game.history.filter((h) => h.outcome === "done").length;
+
+  // A successful rematch swaps this overlay out from under us; guard the
+  // failure-path setState against an unmount, and block a double-tap from
+  // dispatching two rematches.
+  const [readying, setReadying] = useState(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const clickRematch = useCallback(async () => {
+    if (readying) return;
+    setReadying(true);
+    const res = await onRematch();
+    if (!res.ok) {
+      show(res.error.message, "warning");
+      if (mounted.current) setReadying(false);
+    }
+  }, [readying, onRematch, show]);
 
   return (
     <motion.div
@@ -423,6 +462,9 @@ function GameOverOverlay({
       animate={{ opacity: 1, backdropFilter: "blur(4px)" }}
       exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
       transition={{ duration: 0.25, ease: "easeOut" }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dice-over-title"
     >
       <motion.div
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -433,7 +475,7 @@ function GameOverOverlay({
       >
         <div className="text-center">
           <div className="mb-2 text-4xl">{ended ? "🫶" : youWon ? "🏆" : "🔥"}</div>
-          <h2 className="font-display text-2xl font-bold text-ink">
+          <h2 id="dice-over-title" className="font-display text-2xl font-bold text-ink">
             {ended ? "Session ended" : youWon ? "You won!" : `${winnerName} wins`}
           </h2>
           <p className="mt-1 text-sm text-ink-soft">
@@ -472,7 +514,7 @@ function GameOverOverlay({
         )}
 
         <div className="mt-6">
-          <Button fullWidth size="lg" onClick={() => void onRematch()}>
+          <Button fullWidth size="lg" loading={readying} onClick={() => void clickRematch()}>
             {ended ? "Start a new set" : "Play again →"}
           </Button>
         </div>

@@ -92,7 +92,7 @@ function otherSeat(s: Seat): Seat {
 // ---- deterministic deck -----------------------------------------------------
 
 /** Bump when the card set / build changes so seeds intentionally diverge. */
-const MATCH_DECK_VERSION = "2";
+const MATCH_DECK_VERSION = "5";
 
 function buildDeck(
   config: MatchConfig,
@@ -117,11 +117,28 @@ function normalizeConfig(config: MatchConfig): MatchConfig {
   const tiers = MATCH_TIERS.filter((t) => config.tiers?.includes(t));
   const safeTiers = tiers.length > 0 ? tiers : DEFAULT_MATCH_CONFIG.tiers;
   const size = Number.isFinite(config.deckSize) ? Math.round(config.deckSize) : DEFAULT_MATCH_CONFIG.deckSize;
-  return {
+  const safe: MatchConfig = {
     tiers: safeTiers,
     deckSize: Math.max(4, Math.min(60, size)),
     allowMedia: config.allowMedia !== false,
   };
+
+  // Match's deck is filtered by the COUPLE's bodies (matchPool + coupleCanPerform)
+  // AND by the tier/media selection. A selection that leaves ANY body-combo with
+  // no cards - e.g. a (hypothetical) tier whose every card is media, with media
+  // off - would build an empty deck and strand that couple in an unplayable
+  // voting stage. Mirror Dice's guarantee: ensure a non-empty pool for all three
+  // body-combos (both female, both male, mixed); first re-enable media (the
+  // least-surprising repair, since emptiness comes from all-media selections),
+  // then, if still empty, fall back to the full default tier set.
+  const playable = (c: MatchConfig) =>
+    matchPool(c, "female", "female").length > 0 &&
+    matchPool(c, "male", "male").length > 0 &&
+    matchPool(c, "female", "male").length > 0;
+  if (playable(safe)) return safe;
+  const withMedia: MatchConfig = { ...safe, allowMedia: true };
+  if (playable(withMedia)) return withMedia;
+  return { ...withMedia, tiers: [...DEFAULT_MATCH_CONFIG.tiers] };
 }
 
 // ---- round / session helpers -----------------------------------------------
@@ -429,8 +446,10 @@ export function createMatchModule(
           youFinished: false,
           opponentFinished: false,
           dares,
-          currentDareIndex: dares.length ? state.currentDareIndex : -1,
-          currentDare,
+          // Gate on the dares stage exactly like the seated branch below, so a
+          // spectator at the summary sees -1 / null (not an index past the end).
+          currentDareIndex: state.stage === "dares" ? state.currentDareIndex : -1,
+          currentDare: state.stage === "dares" ? currentDare : null,
           yourTurn: false,
           daresResolved,
           sessionEnded: state.sessionEnded,

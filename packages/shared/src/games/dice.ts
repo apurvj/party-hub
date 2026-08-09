@@ -93,7 +93,9 @@ export interface DiceCard {
    * Which body the PERFORMER needs. Dice dares are solo (you do them to
    * yourself on your own turn), so this is filtered per-performer via
    * bodyCanPerform: "female" = a dare for a vulva, "male" = a dare for a penis.
-   * Omitted ⇒ anatomy-neutral (anyone can do it). "mixed" is never used here.
+   * Omitted ⇒ anatomy-neutral, but the shipping deck sets it on EVERY card - each
+   * is raw and body-specific, so a seat only ever draws dares its declared body
+   * can perform. "mixed" is never used here (Dice is solo, never a couple act).
    */
   requires?: BodyReq;
 }
@@ -228,95 +230,69 @@ export interface DicePublicView {
  * off; categories let them exclude anything they're not into. Keep ids STABLE
  * (used as deterministic deck keys).
  *
- * ANATOMY: most dares are body-neutral (they say "yourself" / "where it counts",
- * never naming parts) and can be drawn by anyone. The `requires`-tagged blocks at
- * the end are the explicit, body-specific dares; because Dice dares are SOLO,
- * each seat is dealt a deck filtered to its OWN declared body (see dicePool +
- * bodyCanPerform), so a player is never handed a dare their body can't perform.
+ * ANATOMY: EVERY dare is body-specific and raw - each one names the exact parts
+ * (clit / pussy / folds / nipples / g-spot for a vulva; cock / dick / balls /
+ * shaft / head for a penis) and the exact act. There are no body-neutral cards.
+ * Because Dice dares are SOLO (done on your own turn to your own body), each seat
+ * is dealt a deck filtered to its OWN declared body (see dicePool +
+ * bodyCanPerform), so a player is only ever handed dares their body can perform.
+ * Every category carries both a female-bodied (`d-f-*`) and a male-bodied
+ * (`d-m-*`) variant, so any category selection is playable for either body.
  */
 export const DICE_CARDS: DiceCard[] = [
-  // ---- BDSM / power exchange ------------------------------------------------
-  { id: "d-bd-01", category: "bdsm", text: "Kneel. Hands behind your back. Beg for permission before you touch yourself - and don't until you get it." },
-  { id: "d-bd-02", category: "bdsm", text: "You're theirs now. For three minutes you do only what they say, the instant they say it." },
-  { id: "d-bd-03", category: "bdsm", text: "Collar up - belt or scarf around your throat. You call them Sir / Miss until your next turn." },
-  { id: "d-bd-04", category: "bdsm", text: "Tie your own wrists with a scarf. Now you can't touch - just take whatever they describe doing to you." },
-  { id: "d-bd-05", category: "bdsm", text: "Blindfold on. Hands off. You move only on their word, and not one second before." },
-  { id: "d-bd-06", category: "bdsm", text: "On all fours, ass to the camera. Hold the pose and don't break it until they say you're done." },
-  { id: "d-bd-07", category: "bdsm", text: "Ask permission out loud before every single touch for the next minute. No permission, no touch." },
+  // ---- FEMALE-BODIED performer (a vulva) - explicit clit/pussy/folds dares ---
+  // Only ever dealt to a seat that declared "female". Two per category.
+  { id: "d-f-01", category: "bdsm", requires: "female", text: "Pin your nipples between your fingers, hold them tight - you don't come until I say. Kneel and prove you can take it." },
+  { id: "d-f-02", category: "bdsm", requires: "female", text: "Sit with legs spread wide, hands behind your back. Clench your pussy muscles, pulse your clit with your inner walls. Hold that edge for two minutes." },
+  { id: "d-f-03", category: "anal", requires: "female", text: "Press your finger against your asshole, feel it open. Work it in slow, one knuckle at a time. Make it burn." },
+  { id: "d-f-04", category: "anal", requires: "female", text: "Spit on your finger and circle your ass. Push inside, twist deep, feel your sphincter clench around it. Three times, then stop." },
+  { id: "d-f-05", category: "oral", requires: "female", text: "Suck two fingers deep into your mouth like it's a cock. Slobber on them, swirl your tongue around them and bob your head. No hands guiding - all mouth." },
+  { id: "d-f-06", category: "oral", requires: "female", text: "Gag on your thumb - deep in your throat. Do it again. Let the spit drip down your chin. Three gags, count them." },
+  { id: "d-f-07", category: "improv", requires: "female", text: "Find a smooth object from your kitchen - ice, handle, fruit. Slide it slowly over your pussy. Feel every inch. Don't rush." },
+  { id: "d-f-08", category: "improv", requires: "female", text: "Take something cold from your fridge, rub it across your nipples until they're hard and tight. Then press it to your clit." },
+  { id: "d-f-09", category: "impact", requires: "female", text: "Slap your pussy hard, five times. Count them out loud. Feel the sting on your folds. Make them red." },
+  { id: "d-f-10", category: "impact", requires: "female", text: "Spank your ass cheeks until they're warm and red. Alternate sides. Feel the blood rush. Don't stop until you see the marks." },
+  { id: "d-f-11", category: "edging", requires: "female", text: "Stroke your clit fast until you're right there, trembling. Then stop. Take your hands away for thirty seconds. Do it twice." },
+  { id: "d-f-12", category: "edging", requires: "female", text: "Rub your pussy in circles, building it up. Get close, feel it building. Then pull back. Tease your clit for two minutes." },
+  { id: "d-f-13", category: "worship", requires: "female", text: "Run your hands all over your body. Squeeze your breasts, drag your nails down your stomach, kiss your own neck. Worship what you are." },
+  { id: "d-f-14", category: "worship", requires: "female", text: "Trace your folds with your finger, slowly, like you're discovering them for the first time. Appreciate every inch of your pussy." },
+  { id: "d-f-15", category: "exhibition", requires: "female", media: true, text: "Spread your legs wide and show your pussy to the camera. Hold it open, let them see inside. Keep it there for thirty seconds." },
+  { id: "d-f-16", category: "exhibition", requires: "female", media: true, text: "Record yourself playing with your tits. Suck your own nipple, squeeze them, show them off for the lens." },
+  { id: "d-f-17", category: "roleplay", requires: "female", text: "Say you're a desperate whore. Stroke your clit while you beg. 'Please, I need it so bad.' Mean it." },
+  { id: "d-f-18", category: "roleplay", requires: "female", text: "Act like you're being ordered. 'Show me your clit.' 'Touch your pussy.' Talk dirty as if someone's commanding you. Do what they say." },
+  { id: "d-f-19", category: "dirtytalk", requires: "female", text: "Narrate what you're doing: 'I'm rubbing my clit, it's so wet and swollen.' Keep going, describe every sensation like you're telling a story." },
+  { id: "d-f-20", category: "dirtytalk", requires: "female", text: "Say it out loud while you rub your clit. 'This pussy is for you. Look how wet I am.' Dirty, filthy, loud." },
+  { id: "d-f-21", category: "degradation", requires: "female", text: "Say you're a slut while you rub your pussy. 'I'm such a dirty slut, look at me fuck myself.' Say it until you believe it." },
+  { id: "d-f-22", category: "degradation", requires: "female", text: "Spit on your fingers and use the spit to rub your clit. Say what a mess you are: 'This is all I'm good for.' Own it." },
+  { id: "d-f-23", category: "climax", requires: "female", text: "Rub your clit with your fingers, hard and fast. Build it up and let it crash. Don't stop. Cum." },
+  { id: "d-f-24", category: "climax", requires: "female", text: "Fuck your pussy with your fingers, going deeper each time. Find your g-spot and rub it. Ride it until you cum hard." },
 
-  // ---- Anal -----------------------------------------------------------------
-  { id: "d-an-01", category: "anal", text: "Slick a finger and work yourself open on camera - their pace, not yours. Slower means slower." },
-  { id: "d-an-02", category: "anal", text: "Seat a plug and wear it the rest of the set. Clench on command, face to the camera every turn." },
-  { id: "d-an-03", category: "anal", text: "Fill yourself and say out loud, filthily, exactly how deep and how full it feels." },
-  { id: "d-an-04", category: "anal", text: "Spread on your knees and take their instructions for how hard they'd give it to you from behind." },
-  { id: "d-an-05", category: "anal", text: "Rim a slicked finger in slow circles, teasing, until they tell you to push in." },
-
-  // ---- Oral -----------------------------------------------------------------
-  { id: "d-or-01", category: "oral", text: "Take two fingers all the way to the back of your throat, slow, exactly how they count it." },
-  { id: "d-or-02", category: "oral", text: "Spit, get it messy, and show them the wet, sloppy way you'd suck them off." },
-  { id: "d-or-03", category: "oral", text: "Tongue out. Show them the flat, dragging licks you'd give - base to tip - until they twitch." },
-  { id: "d-or-04", category: "oral", text: "Beg them to sit on your face and say, out loud, every filthy thing you'd do down there." },
-
-  // ---- Improvise: hands & household (no gear required) ----------------------
-  { id: "d-ty-01", category: "improv", text: "Grab a cucumber or a thick handle. Take it slow and deep on camera, their tempo, no hands-free excuses." },
-  { id: "d-ty-02", category: "improv", text: "Ride a pillow (or a wrapped bottle) like it's them - hips working, until they tell you to stop." },
-  { id: "d-ty-03", category: "improv", text: "Press the back of an electric toothbrush / phone-on-vibrate where it counts and hold it there on their word." },
-  { id: "d-ty-04", category: "improv", text: "Whatever's in reach - handle, ice, your own fist - use it exactly how they dictate, speed and depth." },
-  { id: "d-ty-05", category: "improv", text: "Slick your palm and stroke / rub to the pace they clap out - faster, slower, stop, all on them." },
-
-  // ---- Impact ---------------------------------------------------------------
-  { id: "d-im-01", category: "impact", text: "Spank yourself hard. Count each one out loud. They decide the number - and when you stop." },
-  { id: "d-im-02", category: "impact", text: "They pick the spot - leave a mark there. Bite, pinch or slap until it shows, then hold it to the camera." },
-  { id: "d-im-03", category: "impact", text: "Take ten on the ass and thank them, out loud, after every single one." },
-  { id: "d-im-04", category: "impact", text: "Slap your inner thigh closer and closer to the center - they call how high you're allowed to go." },
-
-  // ---- Edging ---------------------------------------------------------------
-  { id: "d-ed-01", category: "edging", text: "Right to the brink - then hands off. Show them the ruined, desperate face you're making." },
-  { id: "d-ed-02", category: "edging", text: "Edge three times, no finishing. They count each one - lose count and you start over." },
-  { id: "d-ed-03", category: "edging", text: "Stroke fast for ten of their counts, then dead stop for ten. Repeat until they let you off." },
-
-  // ---- Climax control -------------------------------------------------------
-  { id: "d-cl-01", category: "climax", text: "You finish only on their word. Hold it as long as they drag it out - beg if you have to." },
-  { id: "d-cl-02", category: "climax", text: "Ruin it: take yourself over the edge, then rip your hands away the instant it starts. Show them." },
-  { id: "d-cl-03", category: "climax", text: "Race - first one to finish while watching the other wins, and has to shout it as it happens." },
-  { id: "d-cl-04", category: "climax", text: "Denied. You do NOT get to finish this turn - work yourself to the edge and leave it aching." },
-
-  // ---- Worship --------------------------------------------------------------
-  { id: "d-wo-01", category: "worship", text: "Hands everywhere they name, in the order they name it - worship your own body as their stand-in." },
-  { id: "d-wo-02", category: "worship", text: "Lick and kiss slowly over the part of you they say they're obsessed with. Make them watch every second." },
-
-  // ---- Exhibition (private, on camera) --------------------------------------
-  { id: "d-ex-01", category: "exhibition", text: "Strip bare and stand fully exposed on camera. Turn slow when they tell you to. Let them look their fill.", media: true },
-  { id: "d-ex-02", category: "exhibition", text: "Send a filthy full-length photo, posed down to the last detail exactly how they order it.", media: true },
-  { id: "d-ex-03", category: "exhibition", text: "Record a ten-second clip finishing 'I want you to…' with the single filthiest thing in your head.", media: true },
-
-  // ---- Filthy talk ----------------------------------------------------------
-  { id: "d-dt-01", category: "dirtytalk", text: "Say your filthiest fantasy out loud, start to finish, no skipping the parts that embarrass you." },
-  { id: "d-dt-02", category: "dirtytalk", text: "Beg, shameless, for exactly why you deserve to finish tonight. Sell it or you don't." },
-
-  // ---- Degradation (consensual) ---------------------------------------------
-  { id: "d-dg-01", category: "degradation", text: "Give them one minute to talk you down the fun way - and tell them, out loud, how much you love it." },
-  { id: "d-dg-02", category: "degradation", text: "Say it plain: you're theirs to use. Then list every way you want them to use you." },
-
-  // ---- Roleplay -------------------------------------------------------------
-  { id: "d-rp-01", category: "roleplay", text: "Strangers who couldn't wait. No names, no giggling - pick it up mid-scene and stay filthy." },
-  { id: "d-rp-02", category: "roleplay", text: "One of you is in trouble and has to earn forgiveness however the other demands. Pick who. Then obey." },
-
-  // ---- BODY-SPECIFIC: female-bodied performer (a vulva) ---------------------
-  // Only ever dealt to a seat that declared "female" - explicit clit/pussy dares.
-  { id: "d-bf-01", category: "edging", requires: "female", text: "Rub your clit in tight circles right to the edge - then hands off and show them your soaked, twitching hips." },
-  { id: "d-bf-02", category: "oral", requires: "female", text: "Two fingers deep, curled to the front wall, while your thumb works your clit. Narrate how wet you are." },
-  { id: "d-bf-03", category: "climax", requires: "female", text: "Grind your clit against the heel of your hand and don't stop until they say you're allowed to soak the sheets." },
-  { id: "d-bf-04", category: "impact", requires: "female", text: "Slap your clit lightly, then rub it hard - alternate on their count of 'sting' and 'soothe'." },
-  { id: "d-bf-05", category: "improv", requires: "female", text: "Ride a wrapped bottle or your own fingers, hips working, and spread wide so they see exactly how deep you take it." },
-
-  // ---- BODY-SPECIFIC: male-bodied performer (a cock) ------------------------
-  // Only ever dealt to a seat that declared "male" - explicit cock/balls dares.
-  { id: "d-bm-01", category: "edging", requires: "male", text: "Stroke slow, thumb over the head, right to the leak - then let go and show them how hard you're aching." },
-  { id: "d-bm-02", category: "climax", requires: "male", text: "Grip the base tight like a cock ring and jerk fast. You finish only when they finish the countdown." },
-  { id: "d-bm-03", category: "worship", requires: "male", text: "Tug your balls and stroke at once, slow, and tell them out loud exactly how badly you need to come." },
-  { id: "d-bm-04", category: "degradation", requires: "male", text: "Jerk it rough to their filthy commentary - faster, slower, 'don't you dare come yet' - and thank them for it." },
-  { id: "d-bm-05", category: "improv", requires: "male", text: "Slick your fist and fuck it hard at the pace they clap out - hips off the bed, no slowing down until they say." },
+  // ---- MALE-BODIED performer (a cock) - explicit cock/balls/shaft dares ------
+  // Only ever dealt to a seat that declared "male". Two per category.
+  { id: "d-m-01", category: "bdsm", requires: "male", text: "Bind your balls tight with your belt. Stroke your cock slow while you're locked down. Earn the release." },
+  { id: "d-m-02", category: "bdsm", requires: "male", text: "Tell yourself you're a filthy toy. Spit on your cock, stroke it hard. You don't come till I say you can." },
+  { id: "d-m-03", category: "anal", requires: "male", text: "Lube your ass. Work one finger in slow, then two. Stroke your dick while you're opening up back there." },
+  { id: "d-m-04", category: "anal", requires: "male", text: "Get on your knees, ass up. Finger-fuck your hole while you pump your cock. Don't waste it yet." },
+  { id: "d-m-05", category: "oral", requires: "male", text: "Grip your shaft tight and stroke hard. Suck your thumb deep in your mouth like it's your cock. Choke on it. Then pump faster." },
+  { id: "d-m-06", category: "oral", requires: "male", text: "Spit in your palm and stroke your cock. Lick your fingers, taste the pre mixed with spit. Suck your thumb deep and gag on it while you keep stroking." },
+  { id: "d-m-07", category: "improv", requires: "male", text: "Grab a cucumber or bottle. Run it down your shaft while you stroke your cock with your other hand." },
+  { id: "d-m-08", category: "improv", requires: "male", text: "Use a pillow under your hips. Hump it while you grip your dick tight, make it messy and wet." },
+  { id: "d-m-09", category: "impact", requires: "male", text: "Slap your balls hard. Count to ten, one slap per number. Then stroke your cock fast to reward it." },
+  { id: "d-m-10", category: "impact", requires: "male", text: "Slap your ass hard, then whip your cock against your thigh. Leave it red and throbbing. Stroke the pain away." },
+  { id: "d-m-11", category: "edging", requires: "male", text: "Stroke your cock fast till your balls tighten. Get right to the edge. Then hands off. Watch it pulse. Do it three times." },
+  { id: "d-m-12", category: "edging", requires: "male", text: "Grip the base of your shaft. Stroke the head only, fast, till you're leaking pre. Stop. Breathe. Repeat till you're shaking." },
+  { id: "d-m-13", category: "worship", requires: "male", text: "Worship your cock with your hands. Massage your shaft slow and deliberate. Stroke it like you're adoring it. Tell it what a perfect tool it is." },
+  { id: "d-m-14", category: "worship", requires: "male", text: "Massage your balls gently, tell them thank you. Run your fingers up your cock from base to tip slow, worship every inch. Treat yourself like a god." },
+  { id: "d-m-15", category: "exhibition", requires: "male", media: true, text: "Show your hard cock on camera. Stroke it slow, let them watch every drip. Own it." },
+  { id: "d-m-16", category: "exhibition", requires: "male", media: true, text: "Pump your dick fast on camera till you're glistening. Show them your balls, show them you're ready." },
+  { id: "d-m-17", category: "roleplay", requires: "male", text: "You're a stripper. Dance for them, stroking your cock slow, showing it off. Build the tension." },
+  { id: "d-m-18", category: "roleplay", requires: "male", text: "Pretend you're their personal toy. Stroke your dick on command, beg them to watch you work." },
+  { id: "d-m-19", category: "dirtytalk", requires: "male", text: "Narrate what you're doing. 'Watch me stroke this cock. Balls tight. Shaft soaking wet.' Keep going, dirty." },
+  { id: "d-m-20", category: "dirtytalk", requires: "male", text: "Tell them what your cock wants. 'My dick needs your mouth, your pussy, your ass.' Stroke and talk." },
+  { id: "d-m-21", category: "degradation", requires: "male", text: "Tell yourself you're a cum-hungry slut. Stroke your desperate dick. You live to come for them." },
+  { id: "d-m-22", category: "degradation", requires: "male", text: "Say 'I'm a dirty cocksucker.' Stroke your shaft hard while you say it. Own your filth." },
+  { id: "d-m-23", category: "climax", requires: "male", text: "Build to it. Stroke your cock faster, grip tighter, make it throb. Let it explode, let them see every pulse." },
+  { id: "d-m-24", category: "climax", requires: "male", text: "Edge once, twice, three times. On the fourth stroke, come hard. Paint your stomach, show them you're drained." },
 ];
 
 /**

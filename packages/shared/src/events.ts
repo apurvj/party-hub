@@ -5,6 +5,7 @@ import type { UnoConfig } from "./games/uno.js";
 import type { GuessWhoConfig } from "./games/guessWho.js";
 import type { MatchConfig } from "./games/match.js";
 import type { DiceConfig } from "./games/dice.js";
+import type { ConnectFourConfig } from "./games/connectFour.js";
 
 /**
  * The socket event catalog - the single source of truth for the wire protocol.
@@ -32,6 +33,7 @@ export interface CreateRoomReq {
   "guess-the-person"?: Partial<GuessWhoConfig>;
   match?: Partial<MatchConfig>;
   dice?: Partial<DiceConfig>;
+  "connect-four"?: Partial<ConnectFourConfig>;
 }
 export interface CreateRoomRes {
   code: string;

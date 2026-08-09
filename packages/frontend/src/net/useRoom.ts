@@ -73,6 +73,8 @@ interface UseRoomResult {
   diceSpin: () => Promise<Result<null>>;
   diceResolve: (outcome: DiceOutcome) => Promise<Result<null>>;
   diceSafeword: () => Promise<Result<null>>;
+  /** Connect Four action sender. */
+  c4Drop: (column: number) => Promise<Result<null>>;
 }
 
 /**
@@ -317,6 +319,14 @@ export function useRoom(roomCode?: string): UseRoomResult {
     return emitAck<{ type: string }, Result<null>>(sock, "game:action", { type: "safeword" });
   }, []);
 
+  const c4Drop = useCallback(async (column: number) => {
+    const sock = getSocket();
+    return emitAck<{ type: string; payload: { column: number } }, Result<null>>(sock, "game:action", {
+      type: "drop",
+      payload: { column },
+    });
+  }, []);
+
   return {
     status,
     room,
@@ -344,6 +354,7 @@ export function useRoom(roomCode?: string): UseRoomResult {
     diceSpin,
     diceResolve,
     diceSafeword,
+    c4Drop,
   };
 }
 

@@ -90,7 +90,7 @@ function otherSeat(s: Seat): Seat {
 // ---- deterministic deck + die ----------------------------------------------
 
 /** Bump when the card set / build changes so seeds intentionally diverge. */
-const DICE_DECK_VERSION = "2";
+const DICE_DECK_VERSION = "5";
 
 function buildDeck(
   config: DiceConfig,

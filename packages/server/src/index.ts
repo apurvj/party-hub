@@ -4,6 +4,7 @@ import express from "express";
 import { Server } from "socket.io";
 import { z } from "zod";
 import {
+  DEFAULT_CONNECT_FOUR_CONFIG,
   DEFAULT_DICE_CONFIG,
   DEFAULT_GUESS_WHO_CONFIG,
   DEFAULT_MATCH_CONFIG,
@@ -59,6 +60,12 @@ const guessWhoConfigSchema = z
   })
   .optional();
 
+const connectFourConfigSchema = z
+  .object({
+    bestOf: z.number().int().min(1).max(9).optional(),
+  })
+  .optional();
+
 const matchConfigSchema = z
   .object({
     tiers: z.array(z.enum(["sweet", "flirty", "spicy", "wild"])).min(1).max(4).optional(),
@@ -95,12 +102,13 @@ const diceConfigSchema = z
   .optional();
 
 const createRoomSchema = z.object({
-  gameId: z.enum(["wordle", "uno", "guess-the-person", "match", "dice"]),
+  gameId: z.enum(["wordle", "uno", "guess-the-person", "match", "dice", "connect-four"]),
   wordle: wordleConfigSchema,
   uno: unoConfigSchema,
   "guess-the-person": guessWhoConfigSchema,
   match: matchConfigSchema,
   dice: diceConfigSchema,
+  "connect-four": connectFourConfigSchema,
 });
 
 const joinRoomSchema = z.object({ code: z.string().min(1).max(12) });
@@ -226,6 +234,7 @@ io.on("connection", (socket) => {
       "guess-the-person": { ...DEFAULT_GUESS_WHO_CONFIG, ...parsed.data["guess-the-person"] },
       match: { ...DEFAULT_MATCH_CONFIG, ...parsed.data.match },
       dice: { ...DEFAULT_DICE_CONFIG, ...parsed.data.dice },
+      "connect-four": { ...DEFAULT_CONNECT_FOUR_CONFIG, ...parsed.data["connect-four"] },
     });
     const res = rooms.join(room.code, playerId, nickname);
     if (!res.ok) return ack(fail(res.error));

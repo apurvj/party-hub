@@ -337,14 +337,14 @@ describe("Dice - sanitize + validation", () => {
   });
 
   it("never leaks a card's `requires` anatomy tag to the client", () => {
-    // A female couple limited to `edging`: the deck mixes neutral edging cards
-    // with the female-only d-bf-01, so a body-specific card is guaranteed to be
-    // drawn - and if `requires` shipped, a peer could read the opponent's body
-    // off the drawn card / history.
+    // A female couple limited to `edging`: every dare in the deck is female-only
+    // (the deck is all body-specific now), so a `requires`-tagged card is
+    // guaranteed to be drawn - and if `requires` shipped, a peer could read the
+    // opponent's body off the drawn card / history.
     const { mod, ctx, state } = setup({ categories: ["edging"], targetScore: 30 }, 0, ["female", "female"]);
     expect(state.decks.A.some((c) => c.requires === "female")).toBe(true);
 
-    // Play through more than a full deck per seat so d-bf-01 is certainly drawn.
+    // Play through more than a full deck per seat so a female-only card is drawn.
     const perSeat = state.decks.A.length;
     for (let i = 0; i < perSeat * 2 + 2 && state.stage !== "over"; i++) {
       playTurn(mod, state, ctx, "done");

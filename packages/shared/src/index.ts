@@ -10,3 +10,4 @@ export * from "./games/uno.js";
 export * from "./games/match.js";
 export * from "./games/guessWho.js";
 export * from "./games/dice.js";
+export * from "./games/connectFour.js";
